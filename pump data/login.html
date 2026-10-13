@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pump Desk · Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8ebed; --card:#ffffff; --ink:#15191e; --mute:#5d6873; --line:#d3d9de;
+  --panel:#11161b; --amber:#ffb81c; --bad:#c0392b; --ok:#1c7a6b; --btn:#15191e; --btn-ink:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1115; --card:#171d23; --ink:#eef1f3; --mute:#97a3ae; --line:#27303a;
+    --panel:#06090c; --btn:#eef1f3; --btn-ink:#11161b; --bad:#ef6a50; --ok:#3fb8a5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1115; --card:#171d23; --ink:#eef1f3; --mute:#97a3ae; --line:#27303a;
+  --panel:#06090c; --btn:#eef1f3; --btn-ink:#11161b; --bad:#ef6a50; --ok:#3fb8a5;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%;display:flex;align-items:center;justify-content:center;padding:16px}
+.shell{width:100%;max-width:400px}
+h1,h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;margin:0;font-weight:600}
+.display{background:var(--panel);border-radius:14px;padding:18px 18px 14px;border:1px solid #000;box-shadow:inset 0 0 0 3px #1d252d}
+.display .brand{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber);font-size:52px;line-height:1;letter-spacing:1px;text-transform:uppercase}
+.display small{display:block;color:#8793a0;font-size:13px;margin-top:6px}
+.display .foot{display:flex;justify-content:space-between;margin-top:12px;color:#8793a0;font-size:13px;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:10px}
+.card h2{font-size:24px}
+.card p{margin:4px 0 0;color:var(--mute);font-size:14px}
+label{display:block;font-size:14px;color:var(--mute);margin:14px 0 4px}
+input{width:100%;font:inherit;font-size:17px;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+.pw{position:relative}
+.pw input{padding-right:64px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--mute);font:inherit;font-size:14px;padding:8px 10px;cursor:pointer;border-radius:8px}
+.go{width:100%;margin-top:18px;border:0;border-radius:12px;background:var(--btn);color:var(--btn-ink);font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:600;padding:13px;cursor:pointer}
+.go:disabled{opacity:.35;cursor:not-allowed}
+.msg{min-height:20px;margin-top:12px;font-size:14px;color:var(--bad)}
+.msg.ok{color:var(--ok)}
+.chk{display:flex;gap:8px;align-items:center;margin:14px 0 0;font-size:14px;color:var(--ink)}
+.chk input{width:20px;height:20px;padding:0}
+.x{border:0;background:transparent;color:var(--mute);font:inherit;font-size:13px;cursor:pointer;padding:2px 0;text-decoration:underline}
+.links{display:flex;justify-content:space-between;margin-top:8px}
+.note{margin-top:14px;color:var(--mute);font-size:12.5px;text-align:center}
+.hide{display:none}
+@media (prefers-reduced-motion:no-preference){.shake{animation:sh .3s}}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="display">
+    <div class="brand">Pump Desk</div>
+    <small>Shift, credit, stock and staff in one place</small>
+    <div class="foot"><span id="date"></span><span id="clock"></span></div>
+  </div>
+
+  <div class="card" id="card">
+    <h2 id="title">Sign in</h2>
+    <p id="sub">Enter your details to open the desk.</p>
+
+    <div id="f">
+      <label for="u">Username</label>
+      <input id="u" autocomplete="username" autocapitalize="none" spellcheck="false">
+
+      <label for="p">Password</label>
+      <div class="pw">
+        <input id="p" type="password" autocomplete="current-password">
+        <button type="button" id="eye" aria-label="Show password">Show</button>
+      </div>
+
+      <div id="confirmWrap" class="hide">
+        <label for="p2">Confirm password</label>
+        <input id="p2" type="password" autocomplete="new-password">
+      </div>
+
+      <label class="chk" id="remWrap"><input type="checkbox" id="rem"> Keep me signed in on this device</label>
+
+      <div class="msg" id="msg" role="alert" aria-live="polite"></div>
+      <button class="go" id="go" type="button">Sign in</button>
+
+      <div class="links"><button type="button" class="x" id="forgot">Forgot password?</button></div>
+    </div>
+
+    <div id="forgotBox" class="hide">
+      <p>Resetting removes only the saved login. Your shifts, credit and stock data stay on this device. You will then create a new login.</p>
+      <button class="go" id="doReset" type="button" style="background:var(--bad);color:#fff">Reset login</button>
+      <div class="links"><button type="button" class="x" id="back">Back to sign in</button></div>
+    </div>
+  </div>
+  <div class="note">Login is stored on this device only.</div>
+</main>
+
+<script>
+(function(){
+  var CK='pumpdesk.login', SK='pumpdesk.session', APP='Pump_Desk.html';
+  var $=function(i){return document.getElementById(i);};
+  var mode='signin';
+
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+  function getCred(){try{return JSON.parse(localStorage.getItem(CK)||'null');}catch(e){return null;}}
+  function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');}
+  function hash(pw,salt){
+    var data=new TextEncoder().encode(salt+':'+pw);
+    if(window.crypto&&crypto.subtle){return crypto.subtle.digest('SHA-256',data).then(hex);}
+    var h=5381;for(var i=0;i<pw.length;i++)h=((h<<5)+h+pw.charCodeAt(i))|0; return Promise.resolve('x'+h);
+  }
+  function salt(){var a=new Uint8Array(12);(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256;}}).getRandomValues(a);return hex(a);}
+
+  function msg(t,ok){var m=$('msg');m.textContent=t||'';m.className='msg'+(ok?' ok':'');}
+  function fail(t){msg(t);var c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');}
+
+  function setMode(m){
+    mode=m;var su=m==='setup';
+    $('title').textContent=su?'Create login':'Sign in';
+    $('sub').textContent=su?'First time here. Choose a username and password for this desk.':'Enter your details to open the desk.';
+    $('go').textContent=su?'Create and open':'Sign in';
+    $('confirmWrap').classList.toggle('hide',!su);
+    $('forgot').classList.toggle('hide',su);
+    $('p').autocomplete=su?'new-password':'current-password';
+    msg('');
+  }
+
+  function enter(remember){
+    try{(remember?localStorage:sessionStorage).setItem(SK,String(Date.now()));
+        if(!remember)localStorage.removeItem(SK);}catch(e){}
+    location.replace(APP);
+  }
+
+  function submit(){
+    var u=$('u').value.trim(),p=$('p').value;
+    if(!u||!p){fail('Enter username and password.');return;}
+    $('go').disabled=true;
+    if(mode==='setup'){
+      if(p.length<6){fail('Use at least 6 characters.');$('go').disabled=false;return;}
+      if(p!==$('p2').value){fail('Passwords do not match.');$('go').disabled=false;return;}
+      var s=salt();
+      hash(p,s).then(function(h){
+        try{localStorage.setItem(CK,JSON.stringify({u:u.toLowerCase(),s:s,h:h}));}catch(e){fail('Could not save login on this device.');$('go').disabled=false;return;}
+        enter($('rem').checked);
+      });
+    }else{
+      var c=getCred();
+      if(!c){setMode('setup');$('go').disabled=false;return;}
+      hash(p,c.s).then(function(h){
+        if(u.toLowerCase()===c.u&&h===c.h){enter($('rem').checked);}
+        else{fail('Wrong username or password.');$('go').disabled=false;$('p').select();}
+      });
+    }
+  }
+
+  $('go').addEventListener('click',submit);
+  ['u','p','p2'].forEach(function(id){$(id).addEventListener('keydown',function(e){if(e.key==='Enter')submit();});});
+  $('eye').addEventListener('click',function(){
+    var show=$('p').type==='password';
+    $('p').type=show?'text':'password';$('p2').type=show?'text':'password';
+    this.textContent=show?'Hide':'Show';this.setAttribute('aria-label',show?'Hide password':'Show password');
+  });
+  $('forgot').addEventListener('click',function(){$('f').classList.add('hide');$('forgotBox').classList.remove('hide');$('title').textContent='Reset login';$('sub').textContent='';});
+  $('back').addEventListener('click',function(){$('forgotBox').classList.add('hide');$('f').classList.remove('hide');setMode('signin');});
+  $('doReset').addEventListener('click',function(){
+    try{localStorage.removeItem(CK);localStorage.removeItem(SK);sessionStorage.removeItem(SK);}catch(e){}
+    $('forgotBox').classList.add('hide');$('f').classList.remove('hide');$('u').value='';$('p').value='';setMode('setup');
+  });
+
+  function tick(){
+    var d=new Date();
+    $('date').textContent=d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+    $('clock').textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }
+  tick();setInterval(tick,30000);
+
+  // already signed in?
+  try{if(localStorage.getItem(SK)||sessionStorage.getItem(SK)){location.replace(APP);return;}}catch(e){}
+  setMode(getCred()?'signin':'setup');
+  $('u').focus();
+})();
+</script>
+</body>
+</html>

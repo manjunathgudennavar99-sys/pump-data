@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>try{if(!(localStorage.getItem('pumpdesk.session')||sessionStorage.getItem('pumpdesk.session')))location.replace('login.html');}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pump Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8ebed; --card:#ffffff; --ink:#15191e; --mute:#5d6873; --line:#d3d9de;
+  --panel:#11161b; --amber:#ffb81c; --amber-dim:#7a5a12;
+  --petrol:#d8472b; --premium:#6a4cc9; --diesel:#1c7a6b;
+  --ok:#1c7a6b; --warn:#b36b00; --bad:#c0392b; --btn:#15191e; --btn-ink:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1115; --card:#171d23; --ink:#eef1f3; --mute:#97a3ae; --line:#27303a;
+    --panel:#06090c; --btn:#eef1f3; --btn-ink:#11161b;
+    --petrol:#ef6a50; --premium:#9b82ee; --diesel:#3fb8a5;
+    --ok:#3fb8a5; --warn:#f0a030; --bad:#ef6a50;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1115; --card:#171d23; --ink:#eef1f3; --mute:#97a3ae; --line:#27303a;
+  --panel:#06090c; --btn:#eef1f3; --btn-ink:#11161b;
+  --petrol:#ef6a50; --premium:#9b82ee; --diesel:#3fb8a5;
+  --ok:#3fb8a5; --warn:#f0a030; --bad:#ef6a50;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 100px}
+h1,h2,h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;margin:0;font-weight:600}
+h2{font-size:22px;margin:18px 0 8px}
+h3{font-size:19px}
+.top{display:flex;justify-content:space-between;align-items:baseline;padding:4px 2px 6px}
+.top h1{font-size:26px}
+.top span{color:var(--mute);font-size:14px}
+.mute{color:var(--mute)} .sm{font-size:14px} .bad{color:var(--bad)} .okc{color:var(--ok)} .warnc{color:var(--warn)}
+
+.display{background:var(--panel);border-radius:14px;padding:14px 16px 12px;border:1px solid #000;box-shadow:inset 0 0 0 3px #1d252d;margin-top:8px}
+.display .row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.display small{color:#8793a0;font-size:13px;display:block}
+.display .big{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--amber);font-size:56px;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums;text-align:right;overflow:hidden;text-overflow:ellipsis}
+.display .mid{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--amber);font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.display .foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:#8793a0;font-size:13px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input,select{width:100%;font:inherit;font-size:17px;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+input:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+input[type=search]{-webkit-appearance:none;appearance:none}
+textarea{width:100%;font:inherit;font-size:15px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);min-height:120px}
+textarea:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+.chk{display:flex;gap:8px;align-items:center;margin:0;font-size:14px;color:var(--ink)}
+.chk input{width:20px;height:20px;padding:0}
+.go{width:100%;margin-top:14px;border:0;border-radius:12px;background:var(--btn);color:var(--btn-ink);font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:600;padding:13px;cursor:pointer}
+.go:disabled{opacity:.35;cursor:not-allowed}
+.btn2{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:10px;font:inherit;cursor:pointer}
+.btn2.danger{color:var(--bad);border-color:var(--bad)}
+.x{border:0;background:transparent;color:var(--mute);font-size:13px;cursor:pointer;padding:2px 0;text-decoration:underline;font-family:inherit}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:10px;padding:3px;gap:3px}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.seg button{border:0;background:transparent;color:var(--mute);font:inherit;font-weight:500;padding:10px 4px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:7px}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat small{color:var(--mute);font-size:13px;display:block}
+.stat b{font-family:'Barlow Condensed',sans-serif;font-size:27px;font-weight:600;font-variant-numeric:tabular-nums}
+.line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);gap:10px;font-variant-numeric:tabular-nums}
+.line:last-child{border-bottom:0}
+.line.strong{font-weight:600}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.nzh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.nzg{display:grid;grid-template-columns:1.15fr 1.15fr .85fr;gap:8px;align-items:end;margin-top:10px}
+.nzg small{display:block;color:var(--mute);font-size:13px;margin-bottom:3px}
+.nzg b{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;display:block;padding:8px 0}
+.nzg input{padding:9px 10px;font-size:17px}
+.nzf{display:flex;justify-content:space-between;margin-top:2px;font-size:14px;min-height:20px;font-variant-numeric:tabular-nums}
+.nz{border-left:5px solid var(--c)}
+.nzt{display:grid;grid-template-columns:1.2fr 1fr auto;gap:8px;align-items:end;margin-top:10px}
+.nzt small{display:block;color:var(--mute);font-size:13px;margin-bottom:3px}
+.nzt input{padding:9px 10px;font-size:16px}
+
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .l{min-width:0}
+.item .l small,.item .r small{display:block;color:var(--mute);font-size:13px}
+.item .r{text-align:right;font-variant-numeric:tabular-nums}
+.tap{cursor:pointer}
+.empty{color:var(--mute);padding:4px 0}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;border-radius:6px}
+
+details.card summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary small{display:block;color:var(--mute);font-size:13px}
+details.card summary .r{text-align:right}
+details .body{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.tr{display:grid;grid-template-columns:1.2fr 1.4fr .9fr 1fr;gap:6px;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tr.h{color:var(--mute);font-size:13px}
+.tr span:last-child{text-align:right}
+.mph{margin:14px 0 4px;padding-top:10px;border-top:2px solid var(--line)}
+
+details.den{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+details.den summary{cursor:pointer;font-weight:500}
+.denrow{display:grid;grid-template-columns:1fr 84px 104px;gap:8px;align-items:center;margin-top:8px}
+.denrow label{margin:0;color:var(--ink)}
+.denrow input{padding:8px;font-size:16px}
+.denrow span{text-align:right;font-variant-numeric:tabular-nums}
+
+.setrow{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:8px;align-items:center}
+.setrow .full{grid-column:1/-1}
+.setrow input,.setrow select{font-size:16px;padding:10px}
+.sep{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(7,1fr);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{border:0;background:transparent;color:var(--mute);font:inherit;font-size:11.5px;font-weight:500;padding:10px 0;border-radius:10px;cursor:pointer}
+nav button[aria-current="page"]{color:var(--ink);background:var(--bg);font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.hide{display:none}
+.nodl .exp-btn{display:none}
+.tr6{display:grid;grid-template-columns:1.6fr .75fr .75fr .75fr .8fr .8fr;gap:6px;padding:7px 0;font-size:14px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tr6.h{color:var(--mute);font-size:13px}
+.tr6 span:not(:first-child){text-align:center}
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dayh{text-align:center;color:var(--mute);font-size:12px}
+.dayb{text-align:center;padding:7px 0;border-radius:6px;font-size:13px;background:var(--bg);color:var(--mute);font-variant-numeric:tabular-nums}
+.dayb.P{background:var(--ok);color:#fff}.dayb.H{background:var(--warn);color:#fff}.dayb.A{background:var(--bad);color:#fff}.dayb.L{background:var(--line);color:var(--ink)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.mcard{background:var(--card);color:var(--ink);border-radius:14px;padding:16px;width:100%;max-width:560px;max-height:88vh;overflow:auto}
+.big2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font:inherit;font-size:15px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Pump Desk</h1><span id="status"></span><button id="logout" style="border:0;background:transparent;color:var(--mute);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer;padding:0 0 0 10px">Sign out</button></div>
+  <section id="v-shift"></section>
+  <section id="v-credit" class="hide"></section>
+  <section id="v-oil" class="hide"></section>
+  <section id="v-exp" class="hide"></section>
+  <section id="v-staff" class="hide"></section>
+  <section id="v-rep" class="hide"></section>
+  <section id="v-set" class="hide"></section>
+</div>
+
+<nav id="tabs">
+  <button data-tab="shift">Shift</button>
+  <button data-tab="credit">Credit</button>
+  <button data-tab="oil">Stock</button>
+  <button data-tab="exp">Expenses</button>
+  <button data-tab="staff">Staff</button>
+  <button data-tab="rep">Reports</button>
+  <button data-tab="set">Settings</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var KEY='pumpdesk.v2';
+  var CATS=['Salary or advance','Electricity','Tea and snacks','Maintenance','Transport','Other'];
+  var SHIFTS=['Morning','Afternoon','Evening','Night'];
+  var DEFAULT_CHARTS={
+    p:{unit:'cm',cap:15000,pts:[[0.5,3.31],[1,9.35],[1.5,17.17],[2,26.42],[2.5,36.89],[3,48.46],[3.5,61.02],[4,74.49],[4.5,88.82],[5,103.95],[5.5,119.83],[6,136.43],[6.5,153.72],[7,171.66],[7.5,190.23],[8,209.41],[8.5,229.16],[9,249.49],[9.5,270.35],[10,291.75],[10.5,313.66],[11,336.07],[11.5,358.96],[12,382.32],[12.5,406.15],[13,430.42],[13.5,455.13],[14,480.28],[14.5,505.83],[15,531.8],[15.5,558.17],[16,584.93],[16.5,612.08],[17,639.61],[17.5,667.5],[18,695.75],[18.5,724.37],[19,753.33],[19.5,782.63],[20,812.27],[20.5,842.25],[21,872.54],[21.5,903.16],[22,934.1],[22.5,965.34],[23,996.89],[23.5,1028.73],[24,1060.88],[24.5,1093.31],[25,1126.03],[25.5,1159.03],[26,1192.3],[26.5,1225.86],[27,1259.68],[27.5,1293.76],[28,1328.11],[28.5,1362.71],[29,1397.57],[29.5,1432.68],[30,1468.04],[30.5,1503.64],[31,1539.48],[31.5,1575.55],[32,1611.86],[32.5,1648.41],[33,1685.17],[33.5,1722.17],[34,1759.38],[34.5,1796.81],[35,1834.46],[35.5,1872.32],[36,1910.39],[36.5,1948.66],[37,1987.14],[37.5,2025.82],[38,2064.7],[38.5,2103.78],[39,2143.05],[39.5,2182.51],[40,2222.16],[40.5,2262],[41,2302.02],[41.5,2342.22],[42,2382.6],[42.5,2423.16],[43,2463.89],[43.5,2504.8],[44,2545.87],[44.5,2587.12],[45,2628.53],[45.5,2670.1],[46,2711.83],[46.5,2753.73],[47,2795.78],[47.5,2837.98],[48,2880.34],[48.5,2922.85],[49,2965.51],[49.5,3008.32],[50,3051.27],[50.5,3094.37],[51,3137.6],[51.5,3180.98],[52,3224.49],[52.5,3268.14],[53,3311.93],[53.5,3355.85],[54,3399.89],[54.5,3444.07],[55,3488.37],[55.5,3532.8],[56,3577.35],[56.5,3622.02],[57,3666.82],[57.5,3711.73],[58,3756.76],[58.5,3801.9],[59,3847.16],[59.5,3892.52],[60,3938],[60.5,3983.59],[61,4029.28],[61.5,4075.08],[62,4120.98],[62.5,4166.99],[63,4213.09],[63.5,4259.29],[64,4305.59],[64.5,4351.99],[65,4398.48],[65.5,4445.07],[66,4491.74],[66.5,4538.51],[67,4585.36],[67.5,4632.3],[68,4679.33],[68.5,4726.43],[69,4773.63],[69.5,4820.9],[70,4868.25],[70.5,4915.68],[71,4963.19],[71.5,5010.77],[72,5058.43],[72.5,5106.16],[73,5153.96],[73.5,5201.83],[74,5249.76],[74.5,5297.77],[75,5345.84],[75.5,5393.97],[76,5442.17],[76.5,5490.43],[77,5538.75],[77.5,5587.12],[78,5635.56],[78.5,5684.05],[79,5732.6],[79.5,5781.19],[80,5829.84],[80.5,5878.55],[81,5927.3],[81.5,5976.1],[82,6024.94],[82.5,6073.83],[83,6122.77],[83.5,6171.75],[84,6220.77],[84.5,6269.83],[85,6318.92],[85.5,6368.06],[86,6417.23],[86.5,6466.44],[87,6515.68],[87.5,6564.96],[88,6614.26],[88.5,6663.6],[89,6712.96],[89.5,6762.36],[90,6811.77],[90.5,6861.22],[91,6910.68],[91.5,6960.17],[92,7009.68],[92.5,7059.22],[93,7108.76],[93.5,7158.33],[94,7207.91],[94.5,7257.51],[95,7307.12],[95.5,7356.75],[96,7406.38],[96.5,7456.03],[97,7505.68],[97.5,7555.34],[98,7605.01],[98.5,7654.68],[99,7704.36],[99.5,7754.04],[100,7803.72],[100.5,7853.4],[101,7903.07],[101.5,7952.75],[102,8002.42],[102.5,8052.09],[103,8101.75],[103.5,8151.41],[104,8201.05],[104.5,8250.69],[105,8300.31],[105.5,8349.92],[106,8399.52],[106.5,8449.1],[107,8498.67],[107.5,8548.22],[108,8597.75],[108.5,8647.26],[109,8696.75],[109.5,8746.21],[110,8795.66],[110.5,8845.08],[111,8894.47],[111.5,8943.83],[112,8993.17],[112.5,9042.47],[113,9091.75],[113.5,9140.99],[114,9190.2],[114.5,9239.37],[115,9288.51],[115.5,9337.61],[116,9386.67],[116.5,9435.69],[117,9484.66],[117.5,9533.6],[118,9582.49],[118.5,9631.34],[119,9680.14],[119.5,9728.89],[120,9777.59],[120.5,9826.24],[121,9874.84],[121.5,9923.38],[122,9971.87],[122.5,10020.31],[123,10068.68],[123.5,10117],[124,10165.26],[124.5,10213.46],[125,10261.59],[125.5,10309.66],[126,10357.67],[126.5,10405.61],[127,10453.48],[127.5,10501.27],[128,10549],[128.5,10596.66],[129,10644.24],[129.5,10691.75],[130,10739.18],[130.5,10786.53],[131,10833.81],[131.5,10881],[132,10928.11],[132.5,10975.13],[133,11022.07],[133.5,11068.93],[134,11115.69],[134.5,11162.37],[135,11208.95],[135.5,11255.44],[136,11301.84],[136.5,11348.14],[137,11394.34],[137.5,11440.45],[138,11486.45],[138.5,11532.35],[139,11578.15],[139.5,11623.84],[140,11669.43],[140.5,11714.91],[141,11760.28],[141.5,11805.53],[142,11850.68],[142.5,11895.7],[143,11940.62],[143.5,11985.41],[144,12030.08],[144.5,12074.63],[145,12119.06],[145.5,12163.36],[146,12207.54],[146.5,12251.59],[147,12295.5],[147.5,12339.29],[148,12382.94],[148.5,12426.45],[149,12469.83],[149.5,12513.07],[150,12556.16],[150.5,12599.11],[151,12641.92],[151.5,12684.58],[152,12727.09],[152.5,12769.45],[153,12811.66],[153.5,12853.71],[154,12895.6],[154.5,12937.33],[155,12978.91],[155.5,13020.31],[156,13061.56],[156.5,13102.63],[157,13143.54],[157.5,13184.27],[158,13224.83],[158.5,13265.21],[159,13305.41],[159.5,13345.43],[160,13385.27],[160.5,13424.92],[161,13464.38],[161.5,13503.65],[162,13542.73],[162.5,13581.61],[163,13620.29],[163.5,13658.77],[164,13697.05],[164.5,13735.12],[165,13772.98],[165.5,13810.62],[166,13848.05],[166.5,13885.27],[167,13922.26],[167.5,13959.03],[168,13995.57],[168.5,14031.88],[169,14067.95],[169.5,14103.79],[170,14139.39],[170.5,14174.75],[171,14209.86],[171.5,14244.72],[172,14279.32],[172.5,14313.67],[173,14347.76],[173.5,14381.58],[174,14415.13],[174.5,14448.41],[175,14481.41],[175.5,14514.12],[176,14546.56],[176.5,14578.7],[177,14610.55],[177.5,14642.09],[178,14673.34],[178.5,14704.27],[179,14734.89],[179.5,14765.19],[180,14795.16],[180.5,14824.8],[181,14854.1],[181.5,14883.07],[182,14911.68],[182.5,14939.93],[183,14967.83],[183.5,14995.35],[184,15022.5],[184.5,15049.26],[185,15075.63],[185.5,15101.6],[186,15127.16],[186.5,15152.3],[187,15177.01],[187.5,15201.28],[188,15225.11],[188.5,15248.47],[189,15271.37],[189.5,15293.77],[190,15315.68],[190.5,15337.08],[191,15357.95],[191.5,15378.27],[192,15398.03],[192.5,15417.2],[193,15435.77],[193.5,15453.71],[194,15471],[194.5,15487.6],[195,15503.49],[195.5,15518.61],[196,15532.94],[196.5,15546.42],[197,15558.98],[197.5,15570.54],[198,15581.02],[198.5,15590.26],[199,15598.08],[199.5,15604.12],[200,15607.43]]},
+    d:{unit:'cm',cap:20000,pts:[[0.5,4.48],[1,12.65],[1.5,23.22],[2,35.72],[2.5,49.88],[3,65.53],[3.5,82.51],[4,100.73],[4.5,120.1],[5,140.56],[5.5,162.04],[6,184.49],[6.5,207.87],[7,232.13],[7.5,257.24],[8,283.17],[8.5,309.89],[9,337.37],[9.5,365.59],[10,394.52],[10.5,424.15],[11,454.45],[11.5,485.4],[12,517],[12.5,549.22],[13,582.04],[13.5,615.46],[14,649.45],[14.5,684.02],[15,719.13],[15.5,754.79],[16,790.98],[16.5,827.69],[17,864.91],[17.5,902.63],[18,940.84],[18.5,979.53],[19,1018.69],[19.5,1058.32],[20,1098.4],[20.5,1138.93],[21,1179.9],[21.5,1221.31],[22,1263.14],[22.5,1305.38],[23,1348.04],[23.5,1391.11],[24,1434.57],[24.5,1478.43],[25,1522.67],[25.5,1567.3],[26,1612.3],[26.5,1657.67],[27,1703.4],[27.5,1749.49],[28,1795.94],[28.5,1842.74],[29,1889.87],[29.5,1937.35],[30,1985.16],[30.5,2033.3],[31,2081.77],[31.5,2130.55],[32,2179.65],[32.5,2229.06],[33,2278.78],[33.5,2328.81],[34,2379.13],[34.5,2429.74],[35,2480.65],[35.5,2531.85],[36,2583.33],[36.5,2635.09],[37,2687.12],[37.5,2739.43],[38,2792],[38.5,2844.85],[39,2897.95],[39.5,2951.31],[40,3004.93],[40.5,3058.8],[41,3112.92],[41.5,3167.28],[42,3221.89],[42.5,3276.73],[43,3331.81],[43.5,3387.13],[44,3442.67],[44.5,3498.44],[45,3554.44],[45.5,3610.65],[46,3667.09],[46.5,3723.74],[47,3780.6],[47.5,3837.67],[48,3894.95],[48.5,3952.44],[49,4010.13],[49.5,4068.01],[50,4126.09],[50.5,4184.37],[51,4242.84],[51.5,4301.49],[52,4360.34],[52.5,4419.36],[53,4478.57],[53.5,4537.96],[54,4597.52],[54.5,4657.26],[55,4717.17],[55.5,4777.24],[56,4837.49],[56.5,4897.9],[57,4958.47],[57.5,5019.2],[58,5080.09],[58.5,5141.14],[59,5202.33],[59.5,5263.68],[60,5325.18],[60.5,5386.82],[61,5448.61],[61.5,5510.54],[62,5572.62],[62.5,5634.82],[63,5697.17],[63.5,5759.65],[64,5822.26],[64.5,5885],[65,5947.87],[65.5,6010.86],[66,6073.98],[66.5,6137.22],[67,6200.57],[67.5,6264.05],[68,6327.64],[68.5,6391.34],[69,6455.16],[69.5,6519.08],[70,6583.12],[70.5,6647.25],[71,6711.5],[71.5,6775.84],[72,6840.28],[72.5,6904.82],[73,6969.46],[73.5,7034.19],[74,7099.02],[74.5,7163.93],[75,7228.93],[75.5,7294.02],[76,7359.2],[76.5,7424.46],[77,7489.8],[77.5,7555.21],[78,7620.71],[78.5,7686.28],[79,7751.93],[79.5,7817.65],[80,7883.43],[80.5,7949.29],[81,8015.21],[81.5,8081.2],[82,8147.25],[82.5,8213.37],[83,8279.54],[83.5,8345.77],[84,8412.06],[84.5,8478.4],[85,8544.79],[85.5,8611.24],[86,8677.73],[86.5,8744.27],[87,8810.86],[87.5,8877.49],[88,8944.17],[88.5,9010.88],[89,9077.64],[89.5,9144.43],[90,9211.25],[90.5,9278.11],[91,9345],[91.5,9411.93],[92,9478.88],[92.5,9545.86],[93,9612.86],[93.5,9679.89],[94,9746.93],[94.5,9814],[95,9881.09],[95.5,9948.19],[96,10015.31],[96.5,10082.45],[97,10149.59],[97.5,10216.74],[98,10283.91],[98.5,10351.08],[99,10418.25],[99.5,10485.43],[100,10552.61],[100.5,10619.79],[101,10686.97],[101.5,10754.14],[102,10821.31],[102.5,10888.47],[103,10955.63],[103.5,11022.77],[104,11089.91],[104.5,11157.03],[105,11224.13],[105.5,11291.22],[106,11358.29],[106.5,11425.33],[107,11492.36],[107.5,11559.36],[108,11626.34],[108.5,11693.29],[109,11760.22],[109.5,11827.11],[110,11893.97],[110.5,11960.79],[111,12027.58],[111.5,12094.34],[112,12161.05],[112.5,12227.73],[113,12294.36],[113.5,12360.94],[114,12427.49],[114.5,12493.98],[115,12560.43],[115.5,12626.82],[116,12693.16],[116.5,12759.45],[117,12825.68],[117.5,12891.85],[118,12957.97],[118.5,13024.02],[119,13090.01],[119.5,13155.93],[120,13221.79],[120.5,13287.57],[121,13353.29],[121.5,13418.94],[122,13484.51],[122.5,13550.01],[123,13615.42],[123.5,13680.76],[124,13746.02],[124.5,13811.19],[125,13876.28],[125.5,13941.29],[126,14006.2],[126.5,14071.03],[127,14135.76],[127.5,14200.4],[128,14264.94],[128.5,14329.38],[129,14393.72],[129.5,14457.97],[130,14522.1],[130.5,14586.14],[131,14650.06],[131.5,14713.88],[132,14777.58],[132.5,14841.17],[133,14904.65],[133.5,14968],[134,15031.24],[134.5,15094.36],[135,15157.35],[135.5,15220.22],[136,15282.96],[136.5,15345.57],[137,15408.05],[137.5,15470.39],[138,15532.6],[138.5,15594.67],[139,15656.61],[139.5,15718.39],[140,15780.04],[140.5,15841.54],[141,15902.89],[141.5,15964.08],[142,16025.13],[142.5,16086.02],[143,16146.75],[143.5,16207.32],[144,16267.73],[144.5,16327.98],[145,16388.05],[145.5,16447.96],[146,16507.7],[146.5,16567.26],[147,16626.65],[147.5,16685.86],[148,16744.88],[148.5,16803.73],[149,16862.38],[149.5,16920.85],[150,16979.13],[150.5,17037.21],[151,17095.09],[151.5,17152.78],[152,17210.26],[152.5,17267.54],[153,17324.62],[153.5,17381.48],[154,17438.13],[154.5,17494.57],[155,17550.78],[155.5,17606.78],[156,17662.55],[156.5,17718.09],[157,17773.41],[157.5,17828.49],[158,17883.33],[158.5,17937.94],[159,17992.3],[159.5,18046.42],[160,18100.29],[160.5,18153.91],[161,18207.27],[161.5,18260.37],[162,18313.22],[162.5,18365.79],[163,18418.1],[163.5,18470.13],[164,18521.89],[164.5,18573.37],[165,18624.57],[165.5,18675.47],[166,18726.09],[166.5,18776.41],[167,18826.44],[167.5,18876.16],[168,18925.57],[168.5,18974.67],[169,19023.45],[169.5,19071.92],[170,19120.06],[170.5,19167.87],[171,19215.35],[171.5,19262.48],[172,19309.28],[172.5,19355.72],[173,19401.82],[173.5,19447.55],[174,19492.92],[174.5,19537.92],[175,19582.55],[175.5,19626.79],[176,19670.65],[176.5,19714.11],[177,19757.18],[177.5,19799.84],[178,19842.08],[178.5,19883.91],[179,19925.32],[179.5,19966.29],[180,20006.82],[180.5,20046.9],[181,20086.53],[181.5,20125.69],[182,20164.38],[182.5,20202.59],[183,20240.31],[183.5,20277.53],[184,20314.24],[184.5,20350.43],[185,20386.09],[185.5,20421.2],[186,20455.76],[186.5,20489.76],[187,20523.18],[187.5,20556],[188,20588.22],[188.5,20619.82],[189,20650.77],[189.5,20681.07],[190,20710.7],[190.5,20739.63],[191,20767.85],[191.5,20795.33],[192,20822.05],[192.5,20847.98],[193,20873.09],[193.5,20897.35],[194,20920.73],[194.5,20943.18],[195,20964.66],[195.5,20985.11],[196,21004.49],[196.5,21022.71],[197,21039.69],[197.5,21055.33],[198,21069.5],[198.5,21082],[199,21092.57],[199.5,21100.74],[200,21105.22]]}
+  };
+
+  /* ================= data ================= */
+  function defNozzles(){
+    var out=[],k=['d','d','p','p'];
+    for(var i=0;i<8;i++)out.push({id:'n'+(i+1),name:'Nozzle '+(i+1),fuel:k[i%4],mpd:i<4?'m1':'m2'});
+    return out;
+  }
+  function defaults(){return {
+    cur:'\u20B9', pump:'', testTol:25, notes:[500,200,100,50,20,10],
+    fuels:[
+      {id:'p',name:'Petrol',price:111.44,c:'--petrol'},
+      {id:'x',name:'Premium',price:108,c:'--premium'},
+      {id:'d',name:'Diesel',price:99.34,c:'--diesel'}
+    ],
+    mpds:[{id:'m1',name:'MPD 1'},{id:'m2',name:'MPD 2'}],
+    nozzles:defNozzles(),
+    oils:[
+      {id:'o1',name:'2T oil',pack:'1 L',price:0,stock:0,min:0},
+      {id:'o2',name:'Engine oil',pack:'1 L',price:0,stock:0,min:0},
+      {id:'o3',name:'Coolant',pack:'1 L',price:0,stock:0,min:0},
+      {id:'o4',name:'Brake oil',pack:'500 ml',price:0,stock:0,min:0},
+      {id:'o5',name:'Gear box oil',pack:'1 L',price:0,stock:0,min:0}
+    ],
+    oilSales:[],
+    staff:[], attend:[], deds:[], exCredit:false,
+    fstock:{p:{stock:null,cap:0,min:0},x:{stock:null,cap:0,min:0},d:{stock:null,cap:0,min:0}},
+    fuelLog:[],
+    atts:{}, shift:null, shifts:[], customers:[], ledger:[], expenses:[]
+  };}
+  function migrate(o){
+    if(!o.pricesV){
+      o.fuels.forEach(function(f){if(f.id==='p'&&f.price===100)f.price=111.44;if(f.id==='d'&&f.price===92)f.price=99.34;});
+      o.pricesV=1;
+    }
+    o.customers.forEach(function(c){if(!c.acc)c.acc=nextAcc(o.customers);});
+    if(!o.mpds||!o.mpds.length)o.mpds=[{id:'m1',name:'MPD 1'}];
+    var half=Math.ceil(o.nozzles.length/2);
+    o.nozzles.forEach(function(n,i){
+      if(!n.mpd||!o.mpds.some(function(m){return m.id===n.mpd;}))n.mpd=(i<half||o.mpds.length<2)?o.mpds[0].id:o.mpds[1].id;
+    });
+    if(o.att&&!o.atts[o.mpds[0].id])o.atts[o.mpds[0].id]=o.att;
+    o.fuels.forEach(function(f){if(!o.fstock[f.id])o.fstock[f.id]={stock:null,cap:0,min:0};});
+    Object.keys(DEFAULT_CHARTS).forEach(function(k){var t=o.fstock[k];if(t&&!t.chart){t.chart=DEFAULT_CHARTS[k].pts;t.unit=DEFAULT_CHARTS[k].unit||'cm';if(!(t.cap>0))t.cap=DEFAULT_CHARTS[k].cap||t.chart[t.chart.length-1][1];}});
+    var nz=o.nozzles;
+    if(!o.shift&&!o.shifts.length&&nz.length===4&&o.mpds.length===2&&o.mpds[0].id==='m1'&&o.mpds[1].id==='m2'&&
+       nz.every(function(n,i){return n.id==='n'+(i+1)&&n.name==='Nozzle '+(i+1);})&&
+       ['p,d,p,d','p,p,d,d'].indexOf(nz.map(function(n){return n.fuel;}).join(','))>=0&&
+       nz.map(function(n){return n.mpd;}).join(',')==='m1,m1,m2,m2')o.nozzles=defNozzles();
+    var n8=o.nozzles;
+    if(n8.length===8&&n8.every(function(n,i){return n.id==='n'+(i+1)&&n.name==='Nozzle '+(i+1)&&n.mpd===(i<4?'m1':'m2');})&&
+       n8.map(function(n){return n.fuel;}).join(',')==='p,p,d,d,p,p,d,d')n8.forEach(function(n,i){n.fuel=['d','d','p','p'][i%4];});
+    var sh=o.shift;
+    if(sh&&!sh.mp){
+      var m0=o.mpds[0];
+      sh.nz.forEach(function(n){n.mpd=m0.id;});
+      sh.mp=[{id:m0.id,name:m0.name,att:sh.att||'',cash:sh.cash||'',upi:sh.upi||'',card:sh.card||'',cashNote:sh.cashNote||'',den:sh.den||{}}];
+    }
+  }
+  function load(){
+    try{
+      var r=localStorage.getItem(KEY);
+      if(r){var o=JSON.parse(r),d=defaults();for(var k in d){if(o[k]===undefined)o[k]=d[k];}migrate(o);return o;}
+    }catch(e){}
+    return fresh();
+  }
+  function fresh(){var d=defaults();migrate(d);return d;}
+  var S=load();
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+  /* ================= helpers ================= */
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){var d=document.createElement('div');d.textContent=String(s==null?'':s);return d.innerHTML.replace(/"/g,'&quot;');}
+  function r2(n){return Math.round(n*100)/100;}
+  function fmt(n){return Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function money(n){return S.cur+fmt(n);}
+  function pf(s){s=String(s==null?'':s).replace(/,/g,'').trim();if(s==='')return NaN;var v=Number(s);return isFinite(v)?v:NaN;}
+  function am(s){var v=pf(s);return (isNaN(v)||v<0)?0:v;}
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+  function dayKey(t){return new Date(t).toLocaleDateString('en-CA');}
+  function tm(t){return new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+  function dt(t){return new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short'});}
+  function dtm(t){return dt(t)+' '+tm(t);}
+  function dtf(t){return new Date(t).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+  function dur(a,b){var m=Math.max(0,Math.round((b-a)/60000));return Math.floor(m/60)+' h '+(m%60)+' min';}
+  function toLocalInput(t){var d=new Date(t),q=function(n){return String(n).padStart(2,'0');};return d.getFullYear()+'-'+q(d.getMonth()+1)+'-'+q(d.getDate())+'T'+q(d.getHours())+':'+q(d.getMinutes());}
+  function fuelBy(id){return S.fuels.filter(function(f){return f.id===id;})[0]||{id:id,name:'Fuel',price:0,c:'--ink'};}
+  function custBy(id){return S.customers.filter(function(c){return c.id===id;})[0];}
+  function balOf(id){var b=0;S.ledger.forEach(function(e){if(e.cust===id)b+=(e.type==='pay'?-e.A:e.A);});return r2(b);}
+  function mpdName(id){var m=S.mpds.filter(function(x){return x.id===id;})[0];return m?m.name:'MPD';}
+  function mpOf(sh,id){return sh.mp.filter(function(m){return m.id===id;})[0]||sh.mp[0];}
+  function mpFor(sh,id){return sh.mp.some(function(m){return m.id===id;})?id:sh.mp[0].id;}
+  var tt;
+  function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on');},2600);}
+  function twoTap(b,label,fn){
+    if(b.dataset.armed){fn();return;}
+    b.dataset.armed='1';var old=b.textContent;b.textContent=label;
+    setTimeout(function(){if(document.body.contains(b)&&b.dataset.armed){delete b.dataset.armed;b.textContent=old;}},4000);
+  }
+  var ui={tab:'shift',mp:null,cview:'customers',cust:null,addCust:false,editCust:false,per:'month',lastClosed:null,oilView:'sell',oilPay:'Cash',addOil:false,stockView:'fuel'};
+
+  /* ================= calculations ================= */
+  function lastClose(){
+    var m={};
+    S.shifts.slice().sort(function(a,b){return a.t1-b.t1;}).forEach(function(sh){sh.res.rows.forEach(function(r){if(r.close!=null)m[r.id]=r.close;});});
+    return m;
+  }
+  function tolFor(T){return (S.testTol>=0?S.testTol:25)*((T>0?T:5)/5);}
+  function calcMp(sh,m){
+    var rows=sh.nz.filter(function(n){return n.mpd===m.id;}).map(function(n){
+      var c=pf(n.close),price=sh.prices[n.fuel]||0,filled=!isNaN(c),bad=filled&&c<n.open;
+      var G=(filled&&!bad)?r2(c-n.open):0,T=am(n.test),bad2=filled&&!bad&&T>G+0.0001;
+      var L=(filled&&!bad&&!bad2)?r2(G-T):0,terr=pf(n.terr),errOut=!isNaN(terr)&&Math.abs(terr)>tolFor(T);
+      return {id:n.id,name:n.name,fuel:n.fuel,mpd:n.mpd,open:n.open,open0:n.open0,close:filled?c:null,price:price,L:L,A:r2(L*price),G:G,T:T,terr:isNaN(terr)?null:terr,errOut:errOut,bad2:bad2,filled:filled,bad:bad};
+    });
+    var sale=0,lit=0,credit=0,rec=0,exp=0;
+    rows.forEach(function(r){sale+=r.A;lit+=r.L;});
+    S.ledger.forEach(function(e){if(e.shift===sh.id&&mpFor(sh,e.mpd)===m.id){if(e.type==='sale')credit+=e.A;else if(e.type==='pay')rec+=e.A;}});
+    S.expenses.forEach(function(e){if(e.shift===sh.id&&mpFor(sh,e.mpd)===m.id)exp+=e.A;});
+    var oil=0;S.oilSales.forEach(function(e){if(e.shift===sh.id&&mpFor(sh,e.mpd)===m.id)oil+=e.A;});
+    var cash=am(m.cash),upi=am(m.upi),card=am(m.card);
+    sale=r2(sale);credit=r2(credit);rec=r2(rec);exp=r2(exp);oil=r2(oil);
+    var recv=r2(cash+upi+card),expect=r2(sale+oil-credit-exp+rec);
+    return {id:m.id,name:m.name,att:m.att,rows:rows,sale:sale,oil:oil,lit:r2(lit),credit:credit,rec:rec,exp:exp,cash:cash,upi:upi,card:card,recv:recv,expect:expect,diff:r2(recv-expect),
+      cashNote:m.cashNote||'',den:m.den||{},ready:rows.length>0&&rows.every(function(r){return r.filled&&!r.bad&&!r.bad2;})};
+  }
+  function calc(sh){
+    var mps=sh.mp.map(function(m){return calcMp(sh,m);});
+    var t={mps:mps,rows:[],sale:0,oil:0,lit:0,credit:0,rec:0,exp:0,cash:0,upi:0,card:0,recv:0,expect:0,diff:0,ready:mps.length>0};
+    mps.forEach(function(m){
+      t.rows=t.rows.concat(m.rows);
+      ['sale','oil','lit','credit','rec','exp','cash','upi','card','recv','expect','diff'].forEach(function(k){t[k]=r2(t[k]+m[k]);});
+      if(!m.ready)t.ready=false;
+    });
+    return t;
+  }
+  function shortOf(d){return d<0?r2(-d):0;}
+  function excessOf(d){return d>0?r2(d):0;}
+  function diffText(d){return d===0?'Balanced':(d<0?'Short ':'Excess ')+money(Math.abs(d));}
+  function diffCls(d){return d===0?'okc':(d<0?'bad':'warnc');}
+  function attList(sh){return sh.mp.map(function(m){return m.att;}).filter(Boolean).join(', ');}
+  function simpleRow(r){return {id:r.id,name:r.name,fuel:r.fuel,mpd:r.mpd,open:r.open,open0:r.open0,close:r.close,price:r.price,L:r.L,A:r.A,G:r.G,T:r.T,terr:r.terr};}
+  function simpleMp(m){
+    return {id:m.id,name:m.name,att:m.att,sale:m.sale,oil:m.oil,lit:m.lit,credit:m.credit,rec:m.rec,exp:m.exp,cash:m.cash,upi:m.upi,card:m.card,recv:m.recv,expect:m.expect,diff:m.diff,
+      cashNote:m.cashNote,den:JSON.parse(JSON.stringify(m.den||{})),rows:m.rows.map(simpleRow)};
+  }
+  /* closed shifts saved before MPDs existed are shown as one group */
+  function mpsOf(sh){
+    var r=sh.res;if(r.mps)return r.mps;
+    return [{id:'all',name:'All',att:sh.att||'',rows:r.rows,sale:r.sale,oil:r.oil||0,lit:r.lit,credit:r.credit,rec:r.rec,exp:r.exp,cash:r.cash,upi:r.upi,card:r.card,recv:r.recv,expect:r.expect,diff:r.diff,cashNote:sh.cashNote||'',den:sh.den||{}}];
+  }
+
+  /* ================= SHIFT ================= */
+  function reconHTML(c){
+    return '<div class="line"><span>Total sale (from meters)</span><span>'+money(c.sale)+'</span></div>'+
+      '<div class="line"><span>Add oil sales</span><span>+ '+money(c.oil||0)+'</span></div>'+
+      '<div class="line"><span>Less credit given</span><span>\u2212 '+money(c.credit)+'</span></div>'+
+      '<div class="line"><span>Less expenses paid</span><span>\u2212 '+money(c.exp)+'</span></div>'+
+      '<div class="line"><span>Add old dues collected</span><span>+ '+money(c.rec)+'</span></div>'+
+      '<div class="line strong"><span>Expected collection</span><span>'+money(c.expect)+'</span></div>'+
+      '<div class="line strong"><span>Received (cash, UPI, card)</span><span>'+money(c.recv)+'</span></div>'+
+      '<div class="line strong '+diffCls(c.diff)+'"><span>Difference</span><span>'+diffText(c.diff)+'</span></div>';
+  }
+  function denTotal(o){var den=o.den||{},t=0;Object.keys(den).forEach(function(k){t+=(k==='coins'?1:Number(k))*am(den[k]);});return r2(t);}
+  function denKeys(den){return Object.keys(den||{}).filter(function(k){return k!=='coins'&&am(den[k])>0;}).sort(function(a,b){return b-a;});}
+  function denLines(o){
+    var den=o.den||{},h='';
+    denKeys(den).forEach(function(k){var n=am(den[k]);h+='<div class="line mute"><span>'+S.cur+k+' notes \u00D7 '+n+'</span><span>'+money(k*n)+'</span></div>';});
+    if(am(den.coins))h+='<div class="line mute"><span>Coins and other</span><span>'+money(am(den.coins))+'</span></div>';
+    return h;
+  }
+  function cashNotesHTML(m){
+    var den=m.den||{},any=am(den.coins)>0;
+    var rows=(S.notes||[]).map(function(d){var n=am(den[d]);if(n)any=true;
+      return '<div class="denrow"><label for="dn_'+d+'">'+S.cur+d+' notes</label><input id="dn_'+d+'" data-den="'+d+'" type="text" inputmode="numeric" value="'+esc(den[d]||'')+'" placeholder="0"><span id="da_'+d+'">'+money(d*n)+'</span></div>';}).join('');
+    return '<details class="den"'+(any?' open':'')+'><summary>Count cash by notes</summary>'+rows+
+      '<div class="denrow"><label for="dn_coins">Coins and other</label><input id="dn_coins" data-den="coins" type="text" inputmode="decimal" value="'+esc(den.coins||'')+'" placeholder="0"><span></span></div>'+
+      '<div class="line strong" style="margin-top:8px"><span>Counted</span><span id="denTot">'+money(denTotal(m))+'</span></div>'+
+      '<p class="mute sm" style="margin:6px 0 0">Counting fills in Cash in hand for you.</p></details>'+
+      '<label for="pcn">Cash note or remark (optional)</label><input id="pcn" data-cnote="1" type="text" maxlength="120" value="'+esc(m.cashNote||'')+'" placeholder="e.g. 2000 handed to owner">';
+  }
+  function mpdsInUse(){return S.mpds.filter(function(m){return S.nozzles.some(function(n){return n.mpd===m.id;});});}
+
+  function viewShift(){
+    var el=$('v-shift'),sh=S.shift;
+    if(!sh){
+      var use=mpdsInUse();
+      if(!use.length){el.innerHTML=closedCard()+'<div class="card"><h3>No nozzles yet</h3><p class="mute" style="margin:6px 0 0">Add your MPDs and nozzles in Settings, then start a shift.</p></div>';return;}
+      var lc=lastClose(),h=new Date().getHours(),def=h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Night',last=S.shifts[0];
+      el.innerHTML=lowBanner()+closedCard()+'<h2>Start a shift</h2><div class="card">'+
+        '<label for="shName" style="margin-top:0">Shift</label><select id="shName">'+SHIFTS.map(function(n){return '<option'+(n===def?' selected':'')+'>'+n+'</option>';}).join('')+'</select>'+
+        '<label for="shStart">Start date and time</label><input id="shStart" type="datetime-local" value="'+toLocalInput(Date.now())+'"></div>'+
+        use.map(function(m){
+          return '<div class="card"><div class="nzh"><h3>'+esc(m.name)+'</h3><label class="chk"><input type="checkbox" data-use="'+m.id+'" checked>Running this shift</label></div>'+
+            '<div id="mpb_'+m.id+'"><label for="at_'+m.id+'">Attendant on '+esc(m.name)+'</label><input id="at_'+m.id+'" data-att="'+m.id+'" type="text" maxlength="30" value="'+esc(S.atts[m.id]||'')+'" placeholder="Name">'+
+            '<p class="mute sm" style="margin:12px 0 0">First readings'+(last?' (filled from the last reading; change only if the meter differs)':' (what each meter shows now)')+'</p>'+
+            S.nozzles.filter(function(n){return n.mpd===m.id;}).map(function(n){var f=fuelBy(n.fuel);
+              return '<label for="o_'+n.id+'"><i class="dot" style="--c:var('+f.c+')"></i>'+esc(n.name)+' \u00B7 '+esc(f.name)+'</label><input id="o_'+n.id+'" data-open="'+n.id+'" type="text" inputmode="decimal" value="'+(lc[n.id]!=null?lc[n.id]:'')+'">';
+            }).join('')+'</div></div>';
+        }).join('')+
+        '<p class="mute sm" id="startHint" style="margin:10px 2px 0"></p>'+
+        '<button class="go" data-act="startShift" id="startShift">Start shift</button>';
+      checkStart();return;
+    }
+    var c=calc(sh);
+    if(ui.mp!=='sum'&&!sh.mp.some(function(m){return m.id===ui.mp;}))ui.mp=sh.mp[0].id;
+    var head='<div class="display"><div class="row"><div><small>Litres sold</small><div class="mid" id="dLit">0.00</div></div>'+
+      '<div style="flex:1;min-width:0"><small style="text-align:right">Total sale</small><div class="big" id="dSale">0.00</div></div></div>'+
+      '<div class="foot"><span>'+esc(sh.name)+' shift'+(attList(sh)?' \u00B7 '+esc(attList(sh)):'')+'</span><span><span id="dStart">Started '+dtm(sh.t0)+'</span> \u00B7 <button class="x" style="color:#8793a0" data-act="editStart">Edit</button></span></div></div>';
+    var tabs='<div class="seg" style="grid-template-columns:repeat('+(sh.mp.length+1)+',1fr);margin-top:12px">'+
+      sh.mp.map(function(m){return '<button data-act="mpTab" data-id="'+m.id+'" aria-pressed="'+(ui.mp===m.id)+'">'+esc(m.name)+'</button>';}).join('')+
+      '<button data-act="mpTab" data-id="sum" aria-pressed="'+(ui.mp==='sum')+'">Summary</button></div>';
+    el.innerHTML=lowBanner()+head+tabs+(ui.mp==='sum'?summaryHTML(sh):mpHTML(sh,calcMp(sh,mpOf(sh,ui.mp))));
+    updateShift();
+  }
+  function mpHTML(sh,m){
+    return '<h2>'+esc(m.name)+' \u00B7 '+esc(m.att)+'</h2>'+
+      m.rows.map(function(r){var f=fuelBy(r.fuel),n=sh.nz.filter(function(x){return x.id===r.id;})[0];
+        return '<div class="card nz" style="--c:var('+f.c+')"><div class="nzh"><span><b>'+esc(r.name)+'</b> \u00B7 '+esc(f.name)+'</span><span class="mute sm">'+money(r.price)+' per litre</span></div>'+
+          '<div class="nzg"><div><small>First reading</small><input data-first="'+r.id+'" type="text" inputmode="decimal" value="'+esc(String(n.open))+'" aria-label="First reading for '+esc(r.name)+'"></div>'+
+          '<div><small>Last reading</small><input data-close="'+r.id+'" type="text" inputmode="decimal" value="'+esc(n.close)+'" placeholder="Meter now" aria-label="Last reading for '+esc(r.name)+'"></div>'+
+          '<div><small>Litres</small><b id="L_'+r.id+'">0.00</b></div></div>'+
+          '<div class="nzt"><div><small>Test litres (back to tank)</small><input id="t_'+r.id+'" data-test="'+r.id+'" type="text" inputmode="decimal" value="'+esc(n.test||'')+'" placeholder="0" aria-label="Test litres for '+esc(r.name)+'"></div>'+
+          '<div><small>Test error (ml)</small><input data-terr="'+r.id+'" type="text" inputmode="decimal" value="'+esc(n.terr||'')+'" placeholder="optional" aria-label="Test error in ml for '+esc(r.name)+'"></div>'+
+          '<button class="btn2" data-act="testAdd" data-id="'+r.id+'">+5 L</button></div>'+
+          '<div class="nzf"><span class="bad" id="E_'+r.id+'"></span><span id="A_'+r.id+'">'+money(0)+'</span></div></div>';
+      }).join('')+
+      '<h2>Payments received</h2><div class="card">'+
+        '<label for="pc" style="margin-top:0">Cash in hand (after expenses)</label><input id="pc" data-pay="cash" type="text" inputmode="decimal" value="'+esc(mpOf(sh,m.id).cash)+'" placeholder="0">'+cashNotesHTML(m)+
+        '<label for="pu">UPI</label><input id="pu" data-pay="upi" type="text" inputmode="decimal" value="'+esc(mpOf(sh,m.id).upi)+'" placeholder="0">'+
+        '<label for="pk">Card</label><input id="pk" data-pay="card" type="text" inputmode="decimal" value="'+esc(mpOf(sh,m.id).card)+'" placeholder="0">'+
+        '<div class="line strong" style="margin-top:8px"><span>Total received on '+esc(m.name)+'</span><span id="tRecv"></span></div></div>'+
+      '<h2>Closing time</h2><div class="card"><label for="mEnd" style="margin-top:0">Closing time for '+esc(m.name)+'</label><input id="mEnd" data-mend="1" type="datetime-local" value="'+esc(mpOf(sh,m.id).endT||'')+'">'+
+      '<div class="row2" style="margin-top:8px"><button class="btn2" data-act="mEndNow">Set to now</button><button class="btn2" data-act="mEndClear">Clear</button></div>'+
+      '<p class="mute sm" style="margin:8px 0 0">Tap Set to now when '+esc(m.att||'the attendant')+' finishes. If you leave it empty, the shift closing time is used.</p></div>'+
+      '<h2>Reconciliation</h2><div class="card" id="recon"></div>'+
+      '<p class="mute sm" style="margin:8px 2px 0">Credit sales and expenses are added in the Credit and Expenses tabs. Pick '+esc(m.name)+' there so they count against this attendant.</p>';
+  }
+  function summaryHTML(sh){
+    return '<h2>All MPDs</h2><div class="card" id="sumTable"></div>'+
+      '<h2>Combined reconciliation</h2><div class="card" id="recon"></div>'+
+      '<h2>Timings</h2><div class="card"><label for="tStart" style="margin-top:0">Shift start (date and time)</label><input id="tStart" data-time="t0" type="datetime-local" value="'+toLocalInput(sh.t0)+'">'+
+      '<label for="tEnd">Closing time (leave empty to use the moment you tap Close shift)</label><input id="tEnd" data-time="end" type="datetime-local" value="'+esc(sh.endT||'')+'"><div class="row2" style="margin-top:8px"><button class="btn2" data-act="endNow">Set to now</button><button class="btn2" data-act="endClear">Clear</button></div></div>'+
+      '<button class="go" id="closeShift" data-act="closeShift">Close shift</button>'+
+      '<p class="mute sm" id="closeHint" style="margin:8px 2px 0"></p>'+
+      '<div style="text-align:center;margin-top:12px"><button class="x" data-act="discardShift">Discard this shift</button></div>';
+  }
+  function sumTableHTML(c){
+    return c.mps.map(function(m){
+      return '<div class="item"><div class="l"><span><b>'+esc(m.name)+'</b> \u00B7 '+esc(m.att)+'</span><small>'+fmt(m.lit)+' L fuel \u00B7 oil '+money(m.oil)+' \u00B7 received '+money(m.recv)+'</small></div>'+
+        '<div class="r"><b>'+money(m.sale+m.oil)+'</b>'+(m.ready?'<small class="'+diffCls(m.diff)+'">'+diffText(m.diff)+'</small>':'<small>Last readings pending</small>')+'</div></div>';
+    }).join('');
+  }
+  var armClose=false,armT;
+  function updateShift(){
+    var sh=S.shift;if(!sh||!$('dSale'))return;
+    var c=calc(sh);
+    $('dSale').textContent=fmt(c.sale);$('dLit').textContent=fmt(c.lit);
+    c.rows.forEach(function(r){
+      var a=$('L_'+r.id);if(!a)return;
+      a.textContent=fmt(r.L);$('A_'+r.id).textContent=money(r.A);
+      var en=$('E_'+r.id),nzr=sh.nz.filter(function(x){return x.id===r.id;})[0],note='',cls='';
+      if(r.bad){note='Last reading is below the first reading';cls='bad';}
+      else if(r.bad2){note='Test litres are more than the meter litres';cls='bad';}
+      else if(r.errOut){note='Test error is outside the \u00B1'+fmt(tolFor(r.T))+' ml limit. Get this nozzle checked.';cls='bad';}
+      else{
+        var bits=[];
+        if(r.T>0)bits.push('Meter '+fmt(r.G)+' L \u2212 test '+fmt(r.T)+' L');
+        if(nzr&&nzr.open0!==undefined&&nzr.open0!==nzr.open)bits.push('First reading changed from '+fmt(nzr.open0));
+        note=bits.join(' \u00B7 ');cls='warnc';
+      }
+      en.textContent=note;en.className=cls;
+    });
+    var m=c.mps.filter(function(x){return x.id===ui.mp;})[0];
+    if($('tRecv')&&m)$('tRecv').textContent=money(m.recv);
+    var rc=$('recon');if(rc)rc.innerHTML=reconHTML(ui.mp==='sum'?c:(m||c));
+    var st=$('sumTable');if(st)st.innerHTML=sumTableHTML(c);
+    var b=$('closeShift');
+    if(b){
+      b.disabled=!c.ready;if(!armClose)b.textContent='Close shift';
+      var pend=c.mps.filter(function(x){return !x.ready;}).map(function(x){return x.name;});
+      $('closeHint').textContent=pend.length?'Enter the last reading for every nozzle to close. Still pending: '+pend.join(', ')+'.':'';
+    }
+  }
+  function startMps(){return S.mpds.filter(function(m){var cb=document.querySelector('[data-use="'+m.id+'"]');return cb&&cb.checked;});}
+  function checkStart(){
+    var b=$('startShift');if(!b)return;
+    var ok=true,hint='',use=startMps();
+    if(!use.length){ok=false;hint='Select at least one MPD.';}
+    use.forEach(function(m){
+      var a=document.querySelector('[data-att="'+m.id+'"]');
+      if(ok&&(!a||!a.value.trim())){ok=false;hint='Enter the attendant name for '+m.name+'.';}
+      S.nozzles.forEach(function(n){
+        if(n.mpd!==m.id)return;
+        var i=document.querySelector('[data-open="'+n.id+'"]'),v=i?pf(i.value):NaN;
+        if(ok&&(isNaN(v)||v<0)){ok=false;hint='Enter the first reading for '+n.name+' on '+m.name+'.';}
+      });
+    });
+    b.disabled=!ok;var h=$('startHint');if(h)h.textContent=ok?'':hint;
+  }
+  function startShift(){
+    var use=startMps(),t0=new Date($('shStart').value).getTime();if(isNaN(t0))t0=Date.now();
+    var prices={};S.fuels.forEach(function(f){prices[f.id]=f.price;});
+    var mp=use.map(function(m){
+      var a=document.querySelector('[data-att="'+m.id+'"]').value.trim();S.atts[m.id]=a;
+      return {id:m.id,name:m.name,att:a,cash:'',upi:'',card:'',cashNote:'',den:{},endT:''};
+    });
+    S.shift={id:uid(),name:$('shName').value,t0:t0,date:dayKey(t0),endT:'',prices:prices,mp:mp,
+      nz:S.nozzles.filter(function(n){return use.some(function(m){return m.id===n.mpd;});}).map(function(n){
+        return {id:n.id,name:n.name,fuel:n.fuel,mpd:n.mpd,open:pf(document.querySelector('[data-open="'+n.id+'"]').value),close:''};
+      })};
+    ui.mp=mp[0].id;ui.lastClosed=null;
+    save();toast(S.shift.name+' shift started');render();
+  }
+  function closeShift(){
+    var sh=S.shift,c=calc(sh);if(!c.ready)return;
+    var endT=sh.endT?new Date(sh.endT).getTime():Date.now();if(isNaN(endT))endT=Date.now();
+    if(endT<sh.t0){toast('The closing time is before the start time');return;}
+    var early=sh.mp.filter(function(m){var t=m.endT?new Date(m.endT).getTime():endT;return isNaN(t)||t<sh.t0;});
+    if(early.length){toast(early[0].name+' closing time is before the shift start');return;}
+    var b=$('closeShift'),off=c.mps.filter(function(m){return m.diff!==0;});
+    if(off.length&&!armClose){
+      armClose=true;b.textContent=off.map(function(m){return m.name+' '+diffText(m.diff);}).join(' \u00B7 ')+' \u2013 tap again to close';
+      clearTimeout(armT);armT=setTimeout(function(){armClose=false;if($('closeShift'))updateShift();},6000);return;
+    }
+    armClose=false;clearTimeout(armT);
+    sh.t1=endT;sh.att=attList(sh);
+    sh.res={rows:c.rows.map(simpleRow),mps:c.mps.map(simpleMp),
+      sale:c.sale,oil:c.oil,lit:c.lit,credit:c.credit,rec:c.rec,exp:c.exp,cash:c.cash,upi:c.upi,card:c.card,recv:c.recv,expect:c.expect,diff:c.diff};
+    sh.res.mps.forEach(function(rm,i){var raw=sh.mp[i].endT,t=raw?new Date(raw).getTime():endT;rm.t1=isNaN(t)?endT:t;});
+    deductFuel(sh,c);
+    S.shifts.unshift(sh);S.shift=null;ui.lastClosed=sh.id;save();
+    toast('Shift closed');render();
+  }
+  function discardShift(b){
+    twoTap(b,'Tap again to discard',function(){
+      var id=S.shift.id;
+      S.ledger.forEach(function(e){if(e.shift===id)e.shift=null;});
+      S.expenses.forEach(function(e){if(e.shift===id)e.shift=null;});
+      S.oilSales.forEach(function(e){if(e.shift===id)e.shift=null;});
+      S.shift=null;save();toast('Shift discarded');render();
+    });
+  }
+
+  /* ================= CREDIT ================= */
+  function nextAcc(list){var m=0;list.forEach(function(c){var n=parseInt(String(c.acc||'').replace(/\D/g,''),10);if(n>m)m=n;});return 'CR-'+String(m+1).padStart(3,'0');}
+  function oldDues(id){var t=0,d=null;S.ledger.forEach(function(e){if(e.cust===id&&e.type==='open'){t+=e.A;if(d===null||e.t<d)d=e.t;}});return {A:r2(t),t:d};}
+  function dueOf(c){return c.due==null?30:c.due;}
+  function entryPlain(e){
+    var sx=e.sn?' \u00B7 '+e.sn+(e.mn?', '+e.mn:'')+(e.att?', '+e.att:''):'';
+    if(e.type==='open')return 'Opening balance (earlier dues)'+(e.was!=null?' \u00B7 changed from '+S.cur+fmt(e.was):'');
+    if(e.type==='sale'&&e.item)return 'Credit sale \u00B7 '+e.item+' \u00D7 '+e.q+sx;
+    if(e.type==='sale')return 'Credit sale \u00B7 '+fuelBy(e.fuel).name+' '+fmt(e.L)+' L'+(e.veh?' \u00B7 '+e.veh:'')+sx;
+    return 'Payment \u00B7 '+(e.mode||'Cash')+(e.note?' \u00B7 '+e.note:'')+sx;
+  }
+  function entryText(e){return esc(entryPlain(e));}
+  function canEdit(e){return e.shift===null||(S.shift&&e.shift===S.shift.id);}
+  function limitPct(c,b){return c.limit>0?Math.min(100,Math.max(0,b/c.limit*100)):0;}
+  function barColor(p){return p>=90?'var(--bad)':p>=70?'var(--warn)':'var(--ok)';}
+  function mpSelect(id,label){
+    var sh=S.shift;if(!sh||sh.mp.length<2)return '';
+    return '<label for="'+id+'">'+label+'</label><select id="'+id+'">'+sh.mp.map(function(m){return '<option value="'+m.id+'"'+(m.id===ui.mp?' selected':'')+'>'+esc(m.name)+' \u00B7 '+esc(m.att)+'</option>';}).join('')+'</select>';
+  }
+  function pickMp(id){var sh=S.shift,el=$(id);return mpOf(sh,el?el.value:sh.mp[0].id);}
+
+  function aging(c){
+    var L=S.ledger.filter(function(e){return e.cust===c.id;}).sort(function(a,b){return a.t-b.t;}),q=[],paid=0,now=Date.now(),due=dueOf(c);
+    L.forEach(function(e){if(e.type==='pay')paid+=e.A;else q.push({t:e.t,A:e.A});});
+    q.forEach(function(x){var u=Math.min(x.A,paid);x.A=r2(x.A-u);paid=r2(paid-u);});
+    var open=q.filter(function(x){return x.A>0.004;}),over=0;
+    if(due>0)open.forEach(function(x){if((now-x.t)/864e5>due)over+=x.A;});
+    return {over:r2(over),days:open.length?Math.floor((now-open[0].t)/864e5):0};
+  }
+  function stmtData(c,per){
+    var now=Date.now(),from=0,label='All time';
+    if(per==='month'){var d=new Date();from=new Date(d.getFullYear(),d.getMonth(),1).getTime();label=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});}
+    else if(per==='30'){from=now-30*864e5;label='Last 30 days';}
+    var L=S.ledger.filter(function(e){return e.cust===c.id;}).sort(function(a,b){return a.t-b.t;}),run=0,open=0,rows=[],cr=0,pd=0;
+    L.forEach(function(e){
+      var sign=e.type==='pay'?-1:1;
+      run=r2(run+sign*e.A);
+      if(e.t<from){open=run;}
+      else{rows.push({e:e,bal:run});if(sign>0)cr+=e.A;else pd+=e.A;}
+    });
+    return {rows:rows,open:open,close:run,cr:r2(cr),pd:r2(pd),label:label};
+  }
+  function stmtText(c,per){
+    var s=stmtData(c,per);
+    var lines=[(S.pump||'Pump Desk')+' \u2013 Account statement','Customer: '+c.name+' ('+c.acc+')','Period: '+s.label,'Opening balance: '+money(s.open),''];
+    s.rows.forEach(function(r){lines.push(dt(r.e.t)+'  '+entryPlain(r.e)+'  '+(r.e.type==='pay'?'-':'+')+money(r.e.A)+'  Balance '+money(r.bal));});
+    lines.push('','Credit taken: '+money(s.cr),'Payments received: '+money(s.pd),'Closing balance: '+money(s.close));
+    if(c.limit>0)lines.push('Credit limit: '+money(c.limit));
+    return lines.join('\n');
+  }
+  function copyText(txt,msg){
+    try{navigator.clipboard.writeText(txt).then(function(){toast(msg||'Statement copied');},function(){toast('Could not copy on this device');});}
+    catch(e){toast('Could not copy on this device');}
+  }
+  function shareText(txt,title,msg){
+    if(navigator.share){navigator.share({title:title,text:txt}).catch(function(err){if(err&&err.name==='AbortError')return;copyText(txt,msg);});return;}
+    copyText(txt,msg);
+  }
+  function custForm(c){
+    c=c||{};var isNew=!c.id;
+    return '<div class="card"><h3>'+(isNew?'New credit account':'Edit account '+esc(c.acc))+'</h3>'+
+      '<label for="cf_name">Name or company</label><input id="cf_name" type="text" maxlength="50" value="'+esc(c.name||'')+'">'+
+      '<label for="cf_phone">Phone</label><input id="cf_phone" type="text" inputmode="tel" maxlength="20" value="'+esc(c.phone||'')+'">'+
+      '<label for="cf_addr">Address (optional)</label><input id="cf_addr" type="text" maxlength="80" value="'+esc(c.addr||'')+'">'+
+      '<label for="cf_veh">Vehicle numbers (optional, separate with commas)</label><input id="cf_veh" type="text" maxlength="80" value="'+esc(c.veh||'')+'">'+
+      '<div class="row2"><div><label for="cf_limit">Credit limit</label><input id="cf_limit" type="text" inputmode="decimal" placeholder="0 = no limit" value="'+(c.limit>0?c.limit:'')+'"></div>'+
+      '<div><label for="cf_due">Pay within (days)</label><input id="cf_due" type="text" inputmode="numeric" value="'+(c.id?dueOf(c):30)+'"></div></div>'+
+      (function(){var od=c.id?oldDues(c.id):{A:0,t:null};return '<label for="cf_open">Old dues (amount owed from before)</label><input id="cf_open" type="text" inputmode="decimal" placeholder="0" value="'+(od.A>0?od.A:'')+'"><label for="cf_odate">Old dues as of</label><input id="cf_odate" type="date" value="'+toLocalInput(od.t||Date.now()).slice(0,10)+'">';})()+
+      '<button class="go" data-act="saveCust"'+(c.id?' data-id="'+c.id+'"':'')+'>'+(isNew?'Create account':'Save changes')+'</button></div>';
+  }
+  function viewCredit(){
+    var el=$('v-credit'),c=ui.cust?custBy(ui.cust):null;
+    if(c){el.innerHTML=custDetail(c);return;}
+    ui.cust=null;
+    var tot=0,n=0,over=0;
+    S.customers.forEach(function(x){var b=balOf(x.id);if(b>0){tot+=b;n++;}over+=aging(x).over;});
+    var h='<h2>Credit accounts</h2><div class="stats">'+
+      '<div class="stat"><small>Total outstanding</small><b>'+money(tot)+'</b></div>'+
+      '<div class="stat"><small>Overdue</small><b class="'+(over>0?'bad':'')+'">'+money(over)+'</b></div>'+
+      '<div class="stat"><small>Accounts with dues</small><b>'+n+'</b></div>'+
+      '<div class="stat"><small>Total accounts</small><b>'+S.customers.length+'</b></div></div>'+
+      '<div class="seg" style="margin-top:12px"><button data-act="cview" data-v="customers" aria-pressed="'+(ui.cview==='customers')+'">Accounts</button><button data-act="cview" data-v="history" aria-pressed="'+(ui.cview==='history')+'">All activity</button></div>';
+    if(ui.cview==='history'){
+      var L=S.ledger.slice().sort(function(a,b){return b.t-a.t;}).slice(0,150);
+      h+='<div class="card">'+(L.length?L.map(function(e){var cu=custBy(e.cust);
+        return '<div class="item"><div class="l"><span>'+esc(cu?cu.name:'Customer')+(cu?' \u00B7 '+esc(cu.acc):'')+'</span><small>'+dt(e.t)+' '+tm(e.t)+' \u00B7 '+entryText(e)+'</small></div><div class="r"><b class="'+(e.type==='pay'?'okc':'bad')+'">'+(e.type==='pay'?'\u2212 ':'+ ')+money(e.A)+'</b></div></div>';
+      }).join(''):'<div class="empty">No credit activity yet.</div>')+'</div>';
+    }else{
+      h+='<div style="margin-top:12px"><button class="btn2" data-act="addCustToggle">'+(ui.addCust?'Cancel':'New account')+'</button></div>';
+      if(ui.addCust)h+=custForm(null);
+      if(S.customers.length)h+='<label for="cq" style="margin-top:14px">Search accounts</label><input id="cq" type="search" placeholder="Name, account no., phone or vehicle" autocomplete="off">';
+      var list=S.customers.slice().sort(function(a,b){return balOf(b.id)-balOf(a.id);});
+      h+='<div class="card">'+(list.length?list.map(function(x){
+        var b=balOf(x.id),ag=aging(x);
+        return '<div class="item tap cust-row" data-act="openCust" data-id="'+x.id+'" data-s="'+esc((x.name+' '+x.acc+' '+(x.phone||'')+' '+(x.veh||'')).toLowerCase())+'">'+
+          '<div class="l"><span>'+esc(x.name)+'</span><small>'+esc(x.acc)+(x.phone?' \u00B7 '+esc(x.phone):'')+'</small>'+
+          (ag.over>0?'<small class="bad">Overdue '+money(ag.over)+' \u00B7 oldest '+ag.days+' days</small>':'')+'</div>'+
+          '<div class="r"><b class="'+(b>0?'bad':'')+'">'+money(b)+'</b>'+(x.limit>0?'<small>'+Math.round(limitPct(x,b))+'% of limit</small>':'')+'</div></div>';
+      }).join(''):'<div class="empty">No credit accounts yet. Create one to start recording credit sales.</div>')+'</div>';
+    }
+    el.innerHTML=h;
+  }
+  function custDetail(c){
+    var b=balOf(c.id),sh=S.shift,ag=aging(c),per=ui.per||'month',lastPay=null;
+    S.ledger.forEach(function(e){if(e.cust===c.id&&e.type==='pay'&&(!lastPay||e.t>lastPay.t))lastPay=e;});
+    var h='<div style="margin-top:6px"><button class="btn2" data-act="backCust">Back</button> <button class="btn2" data-act="editCustToggle">'+(ui.editCust?'Cancel edit':'Edit account')+'</button> <button class="btn2" data-act="editOldDues">Edit old dues</button></div>'+
+      '<h2 style="margin-top:14px">'+esc(c.name)+'</h2><div class="mute sm">Account '+esc(c.acc)+(c.phone?' \u00B7 '+esc(c.phone):'')+'</div>'+
+      (c.addr?'<div class="mute sm">'+esc(c.addr)+'</div>':'')+
+      (c.veh?'<div class="mute sm">Vehicles: '+esc(c.veh)+'</div>':'')+
+      (oldDues(c.id).A>0?'<div class="mute sm">Old dues entered: '+money(oldDues(c.id).A)+' as of '+dt(oldDues(c.id).t)+'</div>':'')+'<div class="mute sm">'+(dueOf(c)>0?'Pays within '+dueOf(c)+' days':'No due date')+(c.limit>0?' \u00B7 limit '+money(c.limit):' \u00B7 no credit limit')+'</div>';
+    if(ui.editCust)h+=custForm(c);
+    h+='<div class="stats" style="margin-top:10px">'+
+      '<div class="stat"><small>Balance due</small><b class="'+(b>0?'bad':'')+'">'+money(b)+'</b></div>'+
+      '<div class="stat"><small>Credit available</small><b>'+(c.limit>0?money(Math.max(0,c.limit-b)):'No limit')+'</b></div>'+
+      '<div class="stat"><small>'+(dueOf(c)>0?'Overdue (past '+dueOf(c)+' days)':'Oldest unpaid')+'</small><b class="'+(ag.over>0?'bad':'')+'">'+(dueOf(c)>0?money(ag.over):(b>0?ag.days+' days':'\u2013'))+'</b></div>'+
+      '<div class="stat"><small>Last payment</small><b style="font-size:20px">'+(lastPay?money(lastPay.A):'None yet')+'</b>'+(lastPay?'<small>'+dt(lastPay.t)+'</small>':'')+'</div></div>';
+    if(c.limit>0){var pc=limitPct(c,b);h+='<div class="bar" role="img" aria-label="Credit limit used"><i style="width:'+pc+'%;background:'+barColor(pc)+'"></i></div><div class="mute sm" style="margin-top:4px">'+Math.round(pc)+'% of credit limit used</div>';}
+    if(sh){
+      var vehs=(c.veh||'').split(',').map(function(v){return v.trim();}).filter(Boolean);
+      h+='<div class="card"><h3>Credit sale</h3>'+
+        '<label for="cs_fuel">Fuel</label><select id="cs_fuel">'+S.fuels.map(function(f){return '<option value="'+f.id+'">'+esc(f.name)+' \u00B7 '+money(sh.prices[f.id]||f.price)+'/L</option>';}).join('')+'</select>'+
+        '<div class="row2"><div><label for="cs_L">Litres</label><input id="cs_L" type="text" inputmode="decimal" placeholder="0"></div>'+
+        '<div><label for="cs_A">Amount</label><input id="cs_A" type="text" inputmode="decimal" placeholder="0"></div></div>'+
+        mpSelect('cs_mp','Served at (MPD and attendant)')+
+        '<label for="cs_veh">Vehicle number</label><input id="cs_veh" type="text" maxlength="16" list="vl"><datalist id="vl">'+vehs.map(function(v){return '<option value="'+esc(v)+'">';}).join('')+'</datalist>'+
+        '<button class="go" data-act="addSale" data-id="'+c.id+'">Add credit sale</button></div>';
+    }else{
+      h+='<div class="card"><h3>Credit sale</h3><p class="mute" style="margin:6px 0 0">Start a shift in the Shift tab to record credit sales.</p></div>';
+    }
+    h+='<div class="card"><h3>Receive payment</h3>'+
+      '<div class="row2"><div><label for="cp_A">Amount</label><input id="cp_A" type="text" inputmode="decimal" placeholder="0"></div>'+
+      '<div><label for="cp_mode">Paid by</label><select id="cp_mode"><option>Cash</option><option>UPI</option><option>Card</option></select></div></div>'+
+      mpSelect('cp_mp','Received by (MPD and attendant)')+
+      '<label for="cp_note">Note (optional)</label><input id="cp_note" type="text" maxlength="40">'+
+      '<button class="go" data-act="addPay" data-id="'+c.id+'">Record payment</button></div>';
+    var s=stmtData(c,per);
+    h+='<h2>Account statement</h2>'+
+      '<div class="seg three"><button data-act="per" data-v="month" aria-pressed="'+(per==='month')+'">This month</button><button data-act="per" data-v="30" aria-pressed="'+(per==='30')+'">30 days</button><button data-act="per" data-v="all" aria-pressed="'+(per==='all')+'">All time</button></div>'+
+      '<div class="card"><div class="line"><span>Opening balance</span><span>'+money(s.open)+'</span></div>'+
+      (s.rows.length?s.rows.map(function(r){var e=r.e;
+        return '<div class="item"><div class="l"><span>'+entryText(e)+'</span><small>'+dt(e.t)+' '+tm(e.t)+'</small>'+(canEdit(e)&&!e.oilId?'<button class="x" data-act="delLedger" data-id="'+e.id+'">Delete</button>':'')+'</div>'+
+          '<div class="r"><b class="'+(e.type==='pay'?'okc':'bad')+'">'+(e.type==='pay'?'\u2212 ':'+ ')+money(e.A)+'</b><small>balance '+money(r.bal)+'</small></div></div>';
+      }).join(''):'<div class="empty">No entries in this period.</div>')+
+      '<div class="line"><span>Credit taken</span><span>'+money(s.cr)+'</span></div>'+
+      '<div class="line"><span>Payments received</span><span>'+money(s.pd)+'</span></div>'+
+      '<div class="line strong"><span>Closing balance</span><span>'+money(s.close)+'</span></div></div>'+
+      '<div class="row2" style="margin-top:10px"><button class="btn2" data-act="shareStmt" data-id="'+c.id+'">Share statement</button><button class="btn2" data-act="copyStmt" data-id="'+c.id+'">Copy statement</button></div>'+
+      '<p class="mute sm" style="margin:8px 2px 0">Every credit sale records the vehicle, the shift, the MPD and the attendant, so the customer can check each line.</p>';
+    return h;
+  }
+  function linkSale(from){
+    var sh=S.shift;if(!sh||!$('cs_fuel'))return;
+    var f=$('cs_fuel').value,p=sh.prices[f]||fuelBy(f).price||0;
+    if(from==='L'){var l=am($('cs_L').value);$('cs_A').value=l?r2(l*p):'';}
+    else if(from==='A'){var a=am($('cs_A').value);$('cs_L').value=(a&&p)?r2(a/p):'';}
+  }
+
+  /* ================= EXPENSES ================= */
+  function viewExp(){
+    var el=$('v-exp'),k=dayKey(Date.now()),mk=k.slice(0,7),td=0,mo=0;
+    S.expenses.forEach(function(e){var d=dayKey(e.t);if(d===k)td+=e.A;if(d.slice(0,7)===mk)mo+=e.A;});
+    var h='<h2>Expenses</h2><div class="stats"><div class="stat"><small>Today</small><b>'+money(td)+'</b></div><div class="stat"><small>This month</small><b>'+money(mo)+'</b></div></div>'+
+      '<div class="card"><label for="ex_cat" style="margin-top:0">Category</label><select id="ex_cat">'+CATS.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'+
+      '<label for="ex_A">Amount</label><input id="ex_A" type="text" inputmode="decimal" placeholder="0">'+
+      mpSelect('ex_mp','Paid from the cash of (MPD and attendant)')+
+      '<label for="ex_note">Note (optional)</label><input id="ex_note" type="text" maxlength="60">'+
+      '<p class="mute sm" style="margin:10px 0 0">'+(S.shift?'Added to the open '+esc(S.shift.name)+' shift and taken out of that attendant\u2019s expected cash.':'No shift is open, so this is saved on its own and not counted in a shift.')+'</p>'+
+      '<button class="go" data-act="addExp">Add expense</button></div>';
+    var L=S.expenses.slice().sort(function(a,b){return b.t-a.t;}).slice(0,80);
+    h+='<h2>Recent</h2><div class="card">'+(L.length?L.map(function(e){
+      return '<div class="item"><div class="l"><span>'+esc(e.cat)+'</span><small>'+dt(e.t)+' '+tm(e.t)+(e.mn?' \u00B7 '+esc(e.mn)+(e.att?', '+esc(e.att):''):'')+(e.note?' \u00B7 '+esc(e.note):'')+'</small>'+(canEdit(e)?'<button class="x" data-act="delExp" data-id="'+e.id+'">Delete</button>':'')+'</div><div class="r"><b>'+money(e.A)+'</b></div></div>';
+    }).join(''):'<div class="empty">No expenses yet.</div>')+'</div>';
+    el.innerHTML=h;
+  }
+
+  /* ================= REPORTS ================= */
+  function mpBlock(m,single){
+    return (single?'':'<div class="mph"><h3>'+esc(m.name)+' \u00B7 '+esc(m.att)+'</h3></div>')+
+      '<div class="tr h"><span>Nozzle</span><span>First \u2192 Last reading</span><span>Litres</span><span>Amount</span></div>'+
+      m.rows.map(function(x){return '<div class="tr"><span>'+esc(x.name)+'<br><small class="mute">'+esc(fuelBy(x.fuel).name)+(x.T>0?' \u00B7 test '+fmt(x.T)+' L':'')+'</small></span><span>'+fmt(x.open)+' \u2192 '+fmt(x.close)+'</span><span>'+fmt(x.L)+'</span><span>'+money(x.A)+'</span></div>';}).join('')+
+      '<div style="margin-top:6px">'+
+      '<div class="line strong"><span>Fuel sale (from meters)</span><span>'+money(m.sale)+'</span></div>'+((m.oil||0)?'<div class="line"><span>Oil sales</span><span>'+money(m.oil)+'</span></div>':'')+
+      '<div class="line"><span>Credit given</span><span>'+money(m.credit)+'</span></div>'+
+      '<div class="line"><span>Expenses paid</span><span>'+money(m.exp)+'</span></div>'+
+      '<div class="line"><span>Old dues collected</span><span>'+money(m.rec)+'</span></div>'+
+      '<div class="line"><span>Expected collection</span><span>'+money(m.expect)+'</span></div>'+
+      '<div class="line"><span>Cash in hand</span><span>'+money(m.cash)+'</span></div>'+denLines(m)+(m.cashNote?'<div class="line"><span>Cash note</span><span style="text-align:right">'+esc(m.cashNote)+'</span></div>':'')+
+      '<div class="line"><span>UPI</span><span>'+money(m.upi)+'</span></div>'+
+      '<div class="line"><span>Card</span><span>'+money(m.card)+'</span></div>'+
+      '<div class="line strong"><span>Total received</span><span>'+money(m.recv)+'</span></div>'+
+      (m.t1?'<div class="line"><span>Closed at</span><span>'+dtm(m.t1)+'</span></div>':'')+
+      '<div class="line strong '+diffCls(m.diff)+'"><span>Difference</span><span>'+diffText(m.diff)+'</span></div></div>';
+  }
+  function editTimesHTML(s){
+    var mps=mpsOf(s).filter(function(m){return m.id!=='all';});
+    return '<div class="mph"><h3>Edit names and times</h3></div>'+
+      mpsOf(s).map(function(m){return '<label for="ean_'+s.id+'_'+m.id+'" style="margin-top:4px">'+(m.id==='all'?'Attendant name':esc(m.name)+' attendant')+'</label><input id="ean_'+s.id+'_'+m.id+'" type="text" maxlength="30" value="'+esc(m.att||'')+'">';}).join('')+
+      '<label for="est_'+s.id+'" style="margin-top:4px">Shift start (date and time)</label><input id="est_'+s.id+'" type="datetime-local" value="'+toLocalInput(s.t0)+'">'+
+      '<label for="eet_'+s.id+'">Shift closing (date and time)</label><input id="eet_'+s.id+'" type="datetime-local" value="'+toLocalInput(s.t1)+'">'+
+      mps.map(function(m){return '<label for="emt_'+s.id+'_'+m.id+'">'+esc(m.name)+' closing</label><input id="emt_'+s.id+'_'+m.id+'" type="datetime-local" value="'+toLocalInput(m.t1||s.t1)+'">';}).join('')+
+      '<button class="go" data-act="saveTimes" data-id="'+s.id+'">Save changes</button>';
+  }
+  function shiftDetail(s){
+    var r=s.res,mps=mpsOf(s),single=mps.length===1&&mps[0].id==='all';
+    return '<details class="card"'+(ui.editShift===s.id?' open':'')+'><summary><span><b>'+dt(s.t0)+' \u00B7 '+esc(s.name)+'</b><small>'+fmt(r.lit)+' L'+(s.att?' \u00B7 '+esc(s.att):'')+'</small></span>'+
+      '<span class="r"><b>'+money(r.sale+(r.oil||0))+'</b><small class="'+diffCls(r.diff)+'">'+diffText(r.diff)+'</small></span></summary><div class="body">'+
+      mps.map(function(m){return mpBlock(m,single);}).join('')+
+      (mps.length>1?'<div class="mph"><h3>All MPDs</h3></div><div class="line strong"><span>Fuel sale</span><span>'+money(r.sale)+'</span></div>'+(r.oil?'<div class="line"><span>Oil sales</span><span>'+money(r.oil)+'</span></div>':'')+'<div class="line"><span>Total received</span><span>'+money(r.recv)+'</span></div><div class="line strong '+diffCls(r.diff)+'"><span>Net difference</span><span>'+diffText(r.diff)+'</span></div>':'')+
+      '<div class="mph"></div>'+
+      '<div class="line"><span>Started</span><span>'+dtm(s.t0)+'</span></div><div class="line"><span>Closed</span><span>'+dtm(s.t1)+'</span></div><div class="line"><span>Duration</span><span>'+dur(s.t0,s.t1)+'</span></div>'+
+      (ui.editShift===s.id?editTimesHTML(s):'')+
+      '<div class="row2" style="margin-top:10px"><button class="btn2 exp-btn" data-act="exportShift" data-id="'+s.id+'">Export to Excel</button><button class="btn2" data-act="editTimes" data-id="'+s.id+'">'+(ui.editShift===s.id?'Cancel':'Edit names and times')+'</button></div></div></details>';
+  }
+  function dayReadings(T){
+    if(!T.length)return '';
+    var asc=T.slice().sort(function(a,b){return a.t0-b.t0;}),m={},order=[];
+    asc.forEach(function(s){s.res.rows.forEach(function(r){
+      if(!m[r.id]){m[r.id]={name:r.name,fuel:r.fuel,mpd:r.mpd,first:r.open,A:0};order.push(r.id);}
+      m[r.id].last=r.close;m[r.id].A=r2(m[r.id].A+r.A);m[r.id].L=r2((m[r.id].L||0)+r.L);
+    });});
+    return '<h2>Today\u2019s readings</h2><div class="card"><div class="tr h"><span>Nozzle</span><span>First \u2192 Last reading</span><span>Litres</span><span>Amount</span></div>'+
+      order.map(function(id){var x=m[id],L=x.L;return '<div class="tr"><span>'+esc(x.name)+'<br><small class="mute">'+esc((x.mpd?mpdName(x.mpd)+' \u00B7 ':'')+fuelBy(x.fuel).name)+'</small></span><span>'+fmt(x.first)+' \u2192 '+fmt(x.last)+'</span><span>'+fmt(L)+'</span><span>'+money(x.A)+'</span></div>';}).join('')+'</div>';
+  }
+  function byAttendant(T){
+    var rows=[];
+    T.forEach(function(s){mpsOf(s).forEach(function(m){rows.push({s:s,m:m});});});
+    if(!rows.length)return '';
+    return '<h2>Today by attendant</h2><div class="card">'+rows.map(function(x){
+      return '<div class="item"><div class="l"><span>'+esc(x.m.att||'Attendant')+'</span><small>'+esc(x.s.name)+(x.m.id!=='all'?' \u00B7 '+esc(x.m.name):'')+' \u00B7 '+fmt(x.m.lit)+' L</small></div><div class="r"><b>'+money(x.m.sale+(x.m.oil||0))+'</b><small class="'+diffCls(x.m.diff)+'">'+diffText(x.m.diff)+'</small></div></div>';
+    }).join('')+'</div>';
+  }
+  function viewRep(){
+    var el=$('v-rep'),k=dayKey(Date.now()),T=S.shifts.filter(function(s){return s.date===k;});
+    if(ui.repView==='day'){el.innerHTML=repSeg()+dayReportHTML();return;}
+    var sale=0,lit=0,cr=0,ex=0,df=0,oilA=0,oilQ=0;
+    S.oilSales.forEach(function(e){if(dayKey(e.t)===k){oilA+=e.A;oilQ+=e.q;}});
+    T.forEach(function(s){sale+=s.res.sale;lit+=s.res.lit;cr+=s.res.credit;ex+=s.res.exp;df+=s.res.diff;});
+    el.innerHTML=repSeg()+'<h2>Today, closed shifts</h2><div class="stats">'+
+      '<div class="stat"><small>Fuel sale</small><b>'+money(sale)+'</b></div><div class="stat"><small>Litres sold</small><b>'+fmt(lit)+'</b></div>'+
+      '<div class="stat"><small>Credit given</small><b>'+money(cr)+'</b></div><div class="stat"><small>Expenses</small><b>'+money(ex)+'</b></div>'+
+      '<div class="stat"><small>Oil sales</small><b>'+money(oilA)+'</b></div><div class="stat"><small>Oil units sold</small><b>'+r2(oilQ)+'</b></div>'+
+      '<div class="stat"><small>Shifts closed</small><b>'+T.length+'</b></div><div class="stat"><small>Short or excess</small><b class="'+diffCls(r2(df))+'">'+(T.length?diffText(r2(df)):'\u2013')+'</b></div></div>'+
+      byAttendant(T)+dayReadings(T)+
+      '<h2>All shifts</h2>'+(S.shifts.length?S.shifts.map(shiftDetail).join(''):'<div class="card empty">No closed shifts yet. Close a shift and it will appear here.</div>');
+  }
+
+  /* ================= EXCEL EXPORT ================= */
+  var lastRows=null;
+  function xlSheet(rows,widths){
+    var ws=XLSX.utils.aoa_to_sheet(rows);
+    Object.keys(ws).forEach(function(k){if(k.charAt(0)!=='!'&&ws[k].t==='n')ws[k].z='#,##0.00';});
+    ws['!cols']=widths.map(function(w){return {wch:w};});
+    return ws;
+  }
+  function byTime(a,b){return a.t-b.t;}
+  function shiftBook(sh){
+    var r=sh.res,mps=mpsOf(sh),wb=(typeof XLSX!=='undefined')?XLSX.utils.book_new():null,secs=[];
+    function addSec(name,rows,widths){secs.push({name:name,rows:rows,widths:widths});}
+    var led=S.ledger.slice().sort(byTime),bal={},balAt={},balClose={};
+    led.forEach(function(e){
+      var d=e.type==='pay'?-e.A:e.A;
+      bal[e.cust]=r2((bal[e.cust]||0)+d);balAt[e.id]=bal[e.cust];
+      if(e.t<=sh.t1)balClose[e.cust]=bal[e.cust];
+    });
+    var mine=led.filter(function(e){return e.shift===sh.id;});
+    var exps=S.expenses.filter(function(e){return e.shift===sh.id;}).sort(byTime);
+    var byMode={Cash:0,UPI:0,Card:0},fl={};
+    mine.forEach(function(e){if(e.type==='pay'){var md=e.mode||'Cash';byMode[md]=r2((byMode[md]||0)+e.A);}});
+    r.rows.forEach(function(x){var f=fuelBy(x.fuel).name;fl[f]=fl[f]||{L:0,A:0};fl[f].L=r2(fl[f].L+x.L);fl[f].A=r2(fl[f].A+x.A);});
+
+    var testTot=r2(r.rows.reduce(function(a,x){return a+(x.T||0);},0));
+    var sum=[[S.pump||'Pump Desk'],['Shift report'],[],
+      ['Date',new Date(sh.t0).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})],
+      ['Shift',sh.name],['Attendants',sh.att||''],
+      ['Start time',dtf(sh.t0)],['Closing time',dtf(sh.t1)],['Duration',dur(sh.t0,sh.t1)],[],
+      ['By MPD and attendant'],
+      ['MPD','Attendant','Litres sold','Fuel sale','Oil sales','Credit given','Expenses paid','Old dues collected','Expected collection','Cash in hand','UPI','Card','Total received','Difference','Short amount','Excess amount','Status','Start time','Closing time']];
+    mps.forEach(function(m){sum.push([m.name,m.att,m.lit,m.sale,m.oil||0,m.credit,m.exp,m.rec,m.expect,m.cash,m.upi,m.card,m.recv,m.diff,shortOf(m.diff),excessOf(m.diff),diffText(m.diff),dtf(sh.t0),dtf(m.t1||sh.t1)]);});
+    sum.push(['Total','',r.lit,r.sale,r.oil||0,r.credit,r.exp,r.rec,r.expect,r.cash,r.upi,r.card,r.recv,r.diff,mps.reduce(function(a,m){return a+shortOf(m.diff);},0),mps.reduce(function(a,m){return a+excessOf(m.diff);},0),diffText(r.diff),dtf(sh.t0),dtf(sh.t1)],[],
+      ['Sales by fuel','Litres','Amount']);
+    Object.keys(fl).forEach(function(k){sum.push([k,fl[k].L,fl[k].A]);});
+    sum.push(['Total',r.lit,r.sale],['Test litres (returned to tank, not sold)',testTot],[],
+      ['Old dues collected, by payment mode','Amount'],['Cash',byMode.Cash||0],['UPI',byMode.UPI||0],['Card',byMode.Card||0]);
+    mps.forEach(function(m){
+      var dk=denKeys(m.den),coins=am((m.den||{}).coins);
+      if(m.cashNote)sum.push([],[m.name+' cash note or remark',m.cashNote]);
+      if(dk.length||coins){
+        sum.push([],[m.name+' cash count by notes','Count','Amount']);
+        dk.forEach(function(k){var n=am(m.den[k]);sum.push([S.cur+k+' notes',n,r2(k*n)]);});
+        if(coins)sum.push(['Coins and other','',r2(coins)]);
+        sum.push(['Total counted','',denTotal(m)]);
+      }
+    });
+
+    var m1=[['MPD','Attendant','Nozzle','Fuel','Price per litre','First reading','First reading time','Last reading','Last reading time','Meter litres','Test litres','Litres sold','Amount','Test error (ml)','Note']];
+    var gT=0,tT=0;
+    mps.forEach(function(m){
+      var mg=0,mt=0;
+      m.rows.forEach(function(x){
+        var G=x.G!=null?x.G:r2(x.close-x.open),T=x.T||0;mg=r2(mg+G);mt=r2(mt+T);
+        m1.push([m.name,m.att,x.name,fuelBy(x.fuel).name,x.price,x.open,dtf(sh.t0),x.close,dtf(m.t1||sh.t1),G,T,x.L,x.A,x.terr==null?'':x.terr,(x.open0!=null&&x.open0!==x.open)?'First reading changed from '+x.open0:'']);
+      });
+      gT=r2(gT+mg);tT=r2(tT+mt);
+      if(mps.length>1)m1.push([m.name+' total','','','','','','','','',mg,mt,m.lit,m.sale]);
+    });
+    m1.push(['All MPDs total','','','','','','','','',gT,tT,r.lit,r.sale]);
+
+    var cr=[['Type','MPD','Recorded by','Account','Customer','Phone','Date and time','Fuel or product','Vehicle','Litres','Rate per litre','Amount','Payment mode','Note','Customer balance after']];
+    var cl=0,ca=0,pa=0;
+    mine.forEach(function(e){
+      var c=custBy(e.cust)||{},isSale=e.type==='sale';
+      if(isSale){cl+=e.L;ca+=e.A;}else{pa+=e.A;}
+      cr.push([isSale?'Credit sale':'Payment received',e.mn||'',e.att||'',c.acc||'',c.name||'',c.phone||'',dtf(e.t),
+        isSale?(e.item||fuelBy(e.fuel).name):'',isSale?(e.veh||''):'',(isSale&&!e.item)?e.L:'',(isSale&&!e.item&&e.L>0)?r2(e.A/e.L):'',e.A,
+        isSale?'Credit':(e.mode||'Cash'),e.note||'',balAt[e.id]]);
+    });
+    if(cr.length===1)cr.push(['No credit entries in this shift']);
+    cr.push([],['Total credit sales','','','','','','','','',r2(cl),'',r2(ca)],['Total payments received','','','','','','','','','','',r2(pa)]);
+
+    var cc=[['Account','Customer','Phone','Credit litres this shift','Credit amount this shift','Payments this shift','Balance due at shift close','Credit limit']];
+    S.customers.forEach(function(c){
+      var l=0,a=0,p=0;
+      mine.forEach(function(e){if(e.cust===c.id){if(e.type==='sale'){l+=e.L;a+=e.A;}else{p+=e.A;}}});
+      var b=balClose[c.id]||0;
+      if(l||a||p||b>0)cc.push([c.acc,c.name,c.phone||'',r2(l),r2(a),r2(p),b,c.limit>0?c.limit:'No limit']);
+    });
+    if(cc.length===1)cc.push(['No credit customers']);
+
+    var ex=[['Date and time','MPD','Paid by','Category','Note','Amount','Paid from']];
+    exps.forEach(function(e){ex.push([dtf(e.t),e.mn||'',e.att||'',e.cat,e.note||'',e.A,'Cash']);});
+    if(ex.length===1)ex.push(['No expenses in this shift']);
+    ex.push([],['Total expenses','','','','',r.exp,'']);
+
+    addSec('Summary',sum,[34,16,12,13,12,13,13,16,18,13,12,12,14,13,14,14,16,22,22]);
+    addSec('Meter readings',m1,[16,14,14,12,15,14,22,14,22,12,12,12,14,14,30]);
+    addSec('Credit entries',cr,[18,12,14,10,22,14,22,12,16,10,14,14,14,22,20]);
+    addSec('Credit customers',cc,[10,22,14,16,18,16,22,14]);
+    addSec('Expenses',ex,[22,12,14,22,30,14,12]);
+
+    var os=S.oilSales.filter(function(e){return e.shift===sh.id;}).sort(byTime);
+    var oil=[['Date and time','MPD','Sold by','Product','Pack','Quantity','Price each','Amount','Payment mode','Account','Customer']];
+    var ot={Cash:0,UPI:0,Card:0,Credit:0},otot=0;
+    os.forEach(function(e){
+      var c=e.cust?custBy(e.cust):null;
+      oil.push([dtf(e.t),e.mn||'',e.att||'',e.name,e.pack||'',e.q,e.price,e.A,e.pay,c?c.acc:'',c?c.name:'']);
+      ot[e.pay]=r2((ot[e.pay]||0)+e.A);otot=r2(otot+e.A);
+    });
+    if(oil.length===1)oil.push(['No oil sales in this shift']);
+    oil.push([],['Total oil sales','','','','','','',otot],['Cash','','','','','','',ot.Cash||0],['UPI','','','','','','',ot.UPI||0],['Card','','','','','','',ot.Card||0],['On credit','','','','','','',ot.Credit||0]);
+    var ost=[['Product','Pack','Price each','Stock now','Low-stock alert at']];
+    S.oils.forEach(function(o){ost.push([o.name,o.pack||'',o.price,o.stock,o.min]);});
+    addSec('Oil sales',oil,[22,12,14,20,10,10,12,14,14,10,22]);
+    addSec('Oil stock now',ost,[22,10,12,12,18]);
+
+    var fsr=[['Date and time','Fuel','Type','Litres','Stock after','Note']];
+    S.fuelLog.filter(function(e){return e.ref===sh.id||(e.type!=='sale'&&e.t>=sh.t0&&e.t<=sh.t1);}).sort(byTime).forEach(function(e){
+      fsr.push([dtf(e.t),fuelBy(e.fuel).name,fuelLogLabel(e),e.qty||0,e.after,e.note||'']);
+    });
+    if(fsr.length===1)fsr.push(['No fuel stock movements recorded for this shift']);
+    var fsold=fuelSold();
+    fsr.push([],['Fuel tanks now','Stock (book)','Capacity','Low-stock alert at','Status']);
+    fuelsInUse().forEach(function(f){
+      var fz=S.fstock[f.id],nw=fuelNow(f.id,fsold);
+      fsr.push([f.name,nw==null?'Not set':nw,fz.cap||'',fz.min||'',nw==null?'':((fz.min>0&&nw<=fz.min)?'Low':'OK')]);
+    });
+    addSec('Fuel stock',fsr,[22,14,12,18,14,28]);
+    return finishBook(wb,secs);
+  }
+  /* every block goes into one sheet, one under the other */
+  function finishBook(wb,secs){
+    var rows=[],W=[];
+    secs.forEach(function(sec,i){
+      if(i>0){rows.push([],[],['\u25A0 '+sec.name.toUpperCase()]);}
+      sec.rows.forEach(function(r){rows.push(r);});
+      sec.widths.forEach(function(w,j){W[j]=Math.max(W[j]||0,w);});
+    });
+    lastRows=rows;
+    if(wb)XLSX.utils.book_append_sheet(wb,xlSheet(rows,W),'Shift report');
+    return wb;
+  }
+  var XLS_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  var xfile=null;
+  function rowsToTsv(rows){
+    return rows.map(function(r){return r.map(function(c){return String(c==null?'':c).replace(/[\t\r\n]+/g,' ');}).join('\t');}).join('\n');
+  }
+  function sendBook(wb,rows,name){
+    var tsv=rowsToTsv(rows||[]),bytes=null;
+    if(wb){
+      try{
+        var buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        bytes=(buf instanceof ArrayBuffer||ArrayBuffer.isView(buf))?buf:new Uint8Array(buf);
+      }catch(e){bytes=null;}
+    }
+    xfile={name:name,bytes:bytes,tsv:tsv};
+    var p=null;
+    try{p=(window.claude&&window.claude.use)?window.claude.use('downloads'):null;}catch(e){p=null;}
+    Promise.resolve(p).then(function(dl){
+      if(dl&&bytes){
+        return dl.save({filename:name,data:bytes.slice(0)}).then(function(){toast('Excel file ready');});
+      }
+      openExportSheet();
+    }).catch(function(err){
+      if(err&&err.code==='declined')return;
+      openExportSheet();
+    });
+  }
+  function exportShift(id){
+    var sh=S.shifts.filter(function(x){return x.id===id;})[0];
+    if(!sh||!sh.res)return;
+    var wb=null;lastRows=null;
+    try{wb=shiftBook(sh);}catch(e){toast('Could not build the export');return;}
+    sendBook(wb,lastRows,'Pump-'+sh.date+'-'+sh.name+'-'+tm(sh.t0).replace(/\D/g,'')+'.xlsx');
+  }
+  function exportAtt(m){
+    var md=monthData(m);
+    if(!md.rows.length){toast('No staff or attendance for this month');return;}
+    var built=monthRows(md),wb=null;
+    if(typeof XLSX!=='undefined'){
+      try{wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,xlSheet(built.rows,built.widths),'Attendance');}catch(e){wb=null;}
+    }
+    sendBook(wb,built.rows,'Pump-attendance-'+m+'.xlsx');
+  }
+  function exportDay(key){
+    var d=dayData(key);
+    if(!d.items.length){toast('No closed shifts on this date');return;}
+    var built;
+    try{built=dayRows(d);}catch(e){toast('Could not build the day report');return;}
+    var wb=null;
+    if(typeof XLSX!=='undefined'){
+      try{wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,xlSheet(built.rows,built.widths),'Day report');}catch(e){wb=null;}
+    }
+    sendBook(wb,built.rows,'Pump-day-report-'+key+'.xlsx');
+  }
+  /* when this view cannot save a file itself: share it, try a download, or copy it for pasting into Excel */
+  function closeExportSheet(){var m=$('xsheet');if(m&&m.parentNode)m.parentNode.removeChild(m);}
+  function openExportSheet(){
+    if(!xfile)return;
+    closeExportSheet();
+    var canShare=false;
+    try{if(xfile.bytes&&navigator.canShare&&navigator.share)canShare=!!navigator.canShare({files:[new File([xfile.bytes],xfile.name,{type:XLS_MIME})]});}catch(e){canShare=false;}
+    var d=document.createElement('div');d.className='modal';d.id='xsheet';
+    d.innerHTML='<div class="mcard" role="dialog" aria-label="Export to Excel"><h3>Export to Excel</h3>'+
+      '<p class="mute sm" style="margin:6px 0 0">This view can\u2019t save a file straight to your phone, so use one of these.</p>'+
+      (canShare?'<button class="go" data-act="xShare">Share or save the Excel file</button>':'')+
+      (xfile.bytes?'<button class="btn2" style="width:100%;margin-top:10px" data-act="xDownload">Try downloading the .xlsx file</button>':'')+
+      '<button class="btn2" style="width:100%;margin-top:10px" data-act="xCopy">Copy for Excel</button>'+
+      '<p class="mute sm" style="margin:8px 0 0">After copying, open Excel or Google Sheets and paste into the first cell. It comes in as one block, the same as the file.</p>'+
+      '<textarea id="xtext" readonly rows="5" aria-label="Export text"></textarea>'+
+      '<div style="text-align:center;margin-top:10px"><button class="x" data-act="xClose">Close</button></div></div>';
+    document.body.appendChild(d);
+    var ta=$('xtext');if(ta)ta.value=xfile.tsv;
+  }
+  function closedCard(){
+    var sh=ui.lastClosed&&S.shifts.filter(function(x){return x.id===ui.lastClosed;})[0];
+    if(!sh)return '';
+    var r=sh.res,mps=mpsOf(sh);
+    return '<div class="card" style="border-color:var(--ok);border-width:2px"><h3>'+esc(sh.name)+' shift closed</h3>'+
+      '<div class="line"><span>Time</span><span>'+dtm(sh.t0)+' \u2192 '+dtm(sh.t1)+'</span></div>'+
+      '<div class="line"><span>Fuel sale</span><span>'+money(r.sale)+'</span></div>'+(r.oil?'<div class="line"><span>Oil sales</span><span>'+money(r.oil)+'</span></div>':'')+
+      '<div class="line"><span>Total received</span><span>'+money(r.recv)+'</span></div>'+
+      (mps.length>1?mps.map(function(m){return '<div class="line '+diffCls(m.diff)+'"><span>'+esc(m.name)+' \u00B7 '+esc(m.att)+(m.t1?' \u00B7 closed '+tm(m.t1):'')+'</span><span>'+diffText(m.diff)+'</span></div>';}).join(''):
+        '<div class="line strong '+diffCls(r.diff)+'"><span>Difference</span><span>'+diffText(r.diff)+'</span></div>')+
+      fuelStockLines()+'<button class="go exp-btn" data-act="exportShift" data-id="'+sh.id+'">Export to Excel</button>'+
+      '<button class="btn2" style="width:100%;margin-top:10px" data-act="openDay" data-id="'+sh.date+'">View day report</button>'+
+      '<div style="text-align:center;margin-top:10px"><button class="x" data-act="dismissClosed">Dismiss</button></div></div>';
+  }
+
+  /* ================= OIL ================= */
+  function oilBy(id){return S.oils.filter(function(o){return o.id===id;})[0];}
+  function oilLabel(o){return o.name+(o.pack?' '+o.pack:'');}
+  function isLow(o){return o.min>0&&o.stock<=o.min;}
+  function canEditOil(e){return e.shift===null||(S.shift&&e.shift===S.shift.id);}
+  function fmtQ(n){return String(r2(n));}
+  function oilTotal(){var t=$('os_total');if(t)t.textContent=money(am($('os_q').value)*am($('os_p').value));}
+  function oilPick(){
+    var o=oilBy($('os_item').value);
+    $('os_p').value=(o&&o.price>0)?o.price:'';
+    oilTotal();
+  }
+  function oilRow(e){
+    var c=e.cust?custBy(e.cust):null;
+    return '<div class="item"><div class="l"><span>'+esc(e.name+(e.pack?' '+e.pack:''))+' \u00D7 '+fmtQ(e.q)+'</span><small>'+dt(e.t)+' '+tm(e.t)+' \u00B7 '+esc(e.pay)+(c?' \u00B7 '+esc(c.name):'')+(e.mn?' \u00B7 '+esc(e.mn)+(e.att?', '+esc(e.att):''):'')+'</small>'+
+      (canEditOil(e)?'<button class="x" data-act="delOil" data-id="'+e.id+'">Delete</button>':'')+'</div><div class="r"><b>'+money(e.A)+'</b><small>'+money(e.price)+' each</small></div></div>';
+  }
+  function oilFormHTML(){
+    var d=ui.oilDraft||{};
+    var chips=['4T oil','Gear oil','Grease','Hydraulic oil','Chain lube','Wiper fluid'];
+    return '<div class="card"><h3>New product</h3>'+
+      '<div class="chips">'+chips.map(function(c){return '<button class="chip" data-act="oilChip" data-v="'+esc(c)+'">'+esc(c)+'</button>';}).join('')+'</div>'+
+      '<label for="np_name">Name</label><input id="np_name" type="text" maxlength="30" value="'+esc(d.name||'')+'" placeholder="Pick one above or type a name">'+
+      '<div class="row2"><div><label for="np_pack">Pack size</label><input id="np_pack" type="text" maxlength="12" value="'+esc(d.pack||'')+'" placeholder="e.g. 1 L"></div><div><label for="np_price">Price each</label><input id="np_price" type="text" inputmode="decimal" placeholder="0"></div></div>'+
+      '<div class="row2"><div><label for="np_stock">Opening stock</label><input id="np_stock" type="text" inputmode="decimal" placeholder="0"></div><div><label for="np_min">Low-stock alert at</label><input id="np_min" type="text" inputmode="decimal" placeholder="0"></div></div>'+
+      '<button class="go" data-act="saveOil">Add product</button></div>';
+  }
+  /* ================= FUEL STOCK ================= */
+  function fuelSold(){
+    var by={};if(!S.shift)return by;
+    calc(S.shift).rows.forEach(function(r){by[r.fuel]=r2((by[r.fuel]||0)+r.L);});
+    return by;
+  }
+  function fuelPending(f,sold){var fa=(S.shift&&S.shift.fa&&S.shift.fa[f])||0;return Math.max(0,r2((sold[f]||0)-fa));}
+  function fuelNow(f,sold){var fs=S.fstock[f];return(fs&&fs.stock!=null)?r2(fs.stock-fuelPending(f,sold)):null;}
+  function avgDaily(f){
+    var cut=Date.now()-7*864e5,l=0,first=null;
+    S.shifts.forEach(function(sh){
+      if(sh.t0>=cut){if(first===null||sh.t0<first)first=sh.t0;sh.res.rows.forEach(function(r){if(r.fuel===f)l+=r.L;});}
+    });
+    if(!l)return 0;
+    return l/Math.max(1,Math.min(7,(Date.now()-first)/864e5));
+  }
+  function fuelsInUse(){
+    return S.fuels.filter(function(f){return S.nozzles.some(function(n){return n.fuel===f.id;})||(S.fstock[f.id]&&S.fstock[f.id].stock!=null);});
+  }
+  function lowFuels(){
+    var sold=fuelSold();
+    return fuelsInUse().filter(function(f){var fs=S.fstock[f.id],n=fuelNow(f.id,sold);return fs&&n!=null&&fs.min>0&&n<=fs.min;});
+  }
+  function lowBanner(){
+    var low=lowFuels();if(!low.length)return '';
+    var sold=fuelSold();
+    return '<div class="card" style="border-color:var(--bad);border-width:2px"><b class="bad">Low fuel stock</b><div class="sm" style="margin-top:4px">'+
+      low.map(function(f){return esc(f.name)+': '+fmt(fuelNow(f.id,sold))+' L left';}).join(' \u00B7 ')+'. See the Stock tab.</div></div>';
+  }
+  function fuelStockLines(){
+    var sold=fuelSold(),h='';
+    fuelsInUse().forEach(function(f){var n=fuelNow(f.id,sold);if(n!=null)h+='<div class="line"><span>'+esc(f.name)+' in tank</span><span>'+fmt(n)+' L</span></div>';});
+    return h;
+  }
+  /* closing a shift takes the litres sold (last reading minus first reading) off each tank */
+  function deductFuel(sh,c){
+    var by={};
+    c.rows.forEach(function(r){by[r.fuel]=r2((by[r.fuel]||0)+r.L);});
+    Object.keys(by).forEach(function(f){
+      var fs=S.fstock[f];if(!fs||fs.stock==null)return;
+      var L=r2(by[f]-((sh.fa&&sh.fa[f])||0));if(L<=0)return;
+      fs.stock=r2(fs.stock-L);
+      S.fuelLog.push({id:uid(),t:sh.t1,fuel:f,type:'sale',qty:-L,after:fs.stock,ref:sh.id,note:sh.name+' shift'});
+    });
+  }
+  function fuelLogLabel(e){return e.type==='sale'?'Sold (shift)':e.type==='delivery'?'Delivery':'Dip reading';}
+  /* dip chart: height -> litres, with straight-line steps between the readings on the chart */
+  function parseChart(txt){
+    var pts={},bad=null;
+    String(txt||'').split(/\r?\n/).forEach(function(line,i){
+      var toks=line.trim().split(/[\s;:=|]+/).filter(Boolean);
+      if(toks.length===1&&toks[0].indexOf(',')>0)toks=toks[0].split(',');
+      var nums=toks.map(function(t){return Number(t.replace(/,/g,''));}).filter(function(n){return isFinite(n);});
+      if(nums.length<2||toks.length<2)return;
+      if(nums[0]<0||nums[1]<0){bad=bad||('Line '+(i+1)+' has a negative number');return;}
+      pts[nums[0]]=nums[1];
+    });
+    var arr=Object.keys(pts).map(function(k){return [Number(k),pts[k]];}).sort(function(a,b){return a[0]-b[0];});
+    if(bad)return {error:bad};
+    if(arr.length<2)return {error:'Add at least two readings, one per line: the height, then the litres'};
+    for(var i=1;i<arr.length;i++){if(arr[i][1]<arr[i-1][1])return {error:'Litres should go up as the height goes up. Check around '+arr[i][0]};}
+    return {pts:arr};
+  }
+  function chartInfo(fs){
+    var c=fs&&fs.chart;if(!c||c.length<2)return null;
+    return {n:c.length,lo:c[0][0],hi:c[c.length-1][0],lmin:c[0][1],lmax:c[c.length-1][1]};
+  }
+  function chartLitres(c,h){
+    if(!c||c.length<2||isNaN(h)||h<c[0][0]||h>c[c.length-1][0])return null;
+    for(var i=0;i<c.length;i++){
+      if(h===c[i][0])return c[i][1];
+      if(i<c.length-1&&h>c[i][0]&&h<c[i+1][0])return r2(c[i][1]+(h-c[i][0])*(c[i+1][1]-c[i][1])/(c[i+1][0]-c[i][0]));
+    }
+    return null;
+  }
+  function dipMode(f){var m=(ui.dipMode||{})[f];if(m)return m;return chartInfo(S.fstock[f])?'h':'l';}
+  function dipLive(t){
+    var f=t.getAttribute('data-fdip'),fs=S.fstock[f],out=$('dl_'+f);if(!fs||!out)return;
+    var ci=chartInfo(fs),h=pf(t.value);
+    if(!ci||dipMode(f)!=='h'||isNaN(h)){out.textContent='';return;}
+    var L=chartLitres(fs.chart,h);
+    if(L==null){out.textContent='Outside the chart ('+ci.lo+' to '+ci.hi+' '+(fs.unit||'cm')+')';return;}
+    var now=fuelNow(f,fuelSold()),d=now==null?null:r2(L-now);
+    out.textContent='= '+fmt(L)+' L on the chart'+(d===null?'':(d===0?' \u00B7 matches the book stock':' \u00B7 '+fmt(Math.abs(d))+' L '+(d>0?'more':'less')+' than the book stock'));
+  }
+  function chartEditorHTML(f,fs,ci){
+    var txt=(fs.chart||[]).map(function(q){return q[0]+' '+q[1];}).join('\n');
+    return '<details class="den"><summary>Dip chart'+(ci?' \u00B7 '+ci.n+' readings loaded':' \u00B7 not loaded')+'</summary>'+
+      '<p class="mute sm" style="margin:8px 0 0">Paste the chart for this tank, one reading per line: the dip height, then the litres. Any height in between is worked out for you.</p>'+
+      '<label for="fu_'+f.id+'">Dip unit</label><input id="fu_'+f.id+'" type="text" maxlength="6" value="'+esc(fs.unit||'cm')+'">'+
+      '<label for="fch_'+f.id+'">Chart</label><textarea id="fch_'+f.id+'" rows="6" placeholder="10 450&#10;11 520&#10;12 600">'+esc(txt)+'</textarea>'+
+      (ci?'<p class="mute sm" style="margin:6px 0 0">Covers '+ci.lo+' to '+ci.hi+' '+esc(fs.unit||'cm')+' ('+fmt(ci.lmin)+' to '+fmt(ci.lmax)+' L).</p>':'')+
+      '<div class="row2" style="margin-top:8px"><button class="btn2" data-act="chartSave" data-id="'+f.id+'">Save chart</button><button class="btn2" data-act="chartClear" data-id="'+f.id+'">Clear chart</button></div></details>';
+  }
+  function dipSectionHTML(f,fs,set){
+    var ci=chartInfo(fs),mode=ci?dipMode(f.id):'l',u=fs.unit||'cm';
+    return '<h3 style="margin-top:16px;font-size:17px">Dip reading</h3>'+
+      (ci?'<div class="seg" style="margin-top:8px"><button data-act="dipMode" data-id="'+f.id+'" data-v="h" aria-pressed="'+(mode==='h')+'">By dip height ('+esc(u)+')</button><button data-act="dipMode" data-id="'+f.id+'" data-v="l" aria-pressed="'+(mode==='l')+'">By litres</button></div>':'')+
+      '<div class="row2" style="margin-top:8px"><input data-fdip="'+f.id+'" type="text" inputmode="decimal" placeholder="'+(mode==='h'?'Dip height in '+esc(u):'Litres by dip')+'" aria-label="Dip reading for '+esc(f.name)+'"><button class="btn2" data-act="fuelDip" data-id="'+f.id+'">'+(set?'Set from dip':'Set starting stock')+'</button></div>'+
+      '<div class="mute sm" id="dl_'+f.id+'" style="margin-top:4px;min-height:20px"></div>'+
+      chartEditorHTML(f,fs,ci);
+  }
+  function fuelBodyHTML(){
+    var sold=fuelSold(),list=fuelsInUse();
+    if(!list.length)return '<div class="card"><p class="mute" style="margin:0">Add nozzles in Settings first, then set up each tank here.</p></div>';
+    var h='<p class="mute sm" style="margin:10px 2px 0">Stock goes down by itself when you close a shift (last reading minus first reading, for each fuel). Add a delivery when a tanker arrives, and enter a dip reading to correct the book stock.</p>';
+    h+=list.map(function(f){
+      var fs=S.fstock[f.id],set=fs.stock!=null,now=fuelNow(f.id,sold),pend=fuelPending(f.id,sold),low=set&&fs.min>0&&now<=fs.min,avg=avgDaily(f.id);
+      var pct=(set&&fs.cap>0)?Math.max(0,Math.min(100,now/fs.cap*100)):0;
+      return '<div class="card nz" style="--c:var('+f.c+')"><div class="nzh"><h3>'+esc(f.name)+'</h3><b class="big2 '+(low?'bad':'')+'">'+(set?fmt(now)+' L':'Not set')+'</b></div>'+
+        (set&&fs.cap>0?'<div class="bar" role="img" aria-label="Tank level"><i style="width:'+pct+'%;background:'+(low?'var(--bad)':'var(--ok)')+'"></i></div>':'')+
+        (set?
+          '<div class="line"><span>Book stock</span><span>'+fmt(fs.stock)+' L</span></div>'+
+          (pend>0?'<div class="line"><span>Sold in the open shift so far</span><span>\u2212 '+fmt(pend)+' L</span></div>':'')+
+          (fs.cap>0?'<div class="line"><span>Tank capacity</span><span>'+fmt(fs.cap)+' L</span></div>':'')+
+          (avg>0?'<div class="line"><span>Average sale per day (last 7 days)</span><span>'+fmt(avg)+' L</span></div><div class="line"><span>Stock lasts about</span><span>'+(Math.round(now/avg*10)/10)+' days</span></div>':'')+
+          (low?'<p class="bad sm" style="margin:8px 0 0">Below your low-stock level of '+fmt(fs.min)+' L. Time to order.</p>':'')
+          :'<p class="mute sm" style="margin:8px 0 0">Enter a dip reading below to start tracking this tank.</p>')+
+        '<h3 style="margin-top:16px;font-size:17px">Tanker delivery</h3>'+
+        '<div class="row2" style="margin-top:6px"><input data-fd="'+f.id+'" type="text" inputmode="decimal" placeholder="Litres received" aria-label="Litres received for '+esc(f.name)+'"><input data-fn="'+f.id+'" type="text" maxlength="40" placeholder="Invoice or supplier" aria-label="Invoice or supplier"></div>'+
+        '<label for="ft_'+f.id+'">Delivery time</label><input id="ft_'+f.id+'" data-ft="'+f.id+'" type="datetime-local" value="'+toLocalInput(Date.now())+'">'+
+        '<button class="btn2" style="margin-top:8px" data-act="fuelAdd" data-id="'+f.id+'">Add delivery</button>'+
+        dipSectionHTML(f,fs,set)+
+        '<div class="row2"><div><label for="fc_'+f.id+'">Tank capacity (L)</label><input id="fc_'+f.id+'" data-fs="'+f.id+'" data-f="cap" type="text" inputmode="decimal" value="'+(fs.cap||'')+'" placeholder="0"></div>'+
+        '<div><label for="fm_'+f.id+'">Low-stock alert at (L)</label><input id="fm_'+f.id+'" data-fs="'+f.id+'" data-f="min" type="text" inputmode="decimal" value="'+(fs.min||'')+'" placeholder="0"></div></div></div>';
+    }).join('');
+    var L=S.fuelLog.slice().reverse().slice(0,40);
+    h+='<h2>Stock movements</h2><div class="card">'+(L.length?L.map(function(e){
+      var qty=e.qty||0;
+      return '<div class="item"><div class="l"><span>'+esc(fuelBy(e.fuel).name)+' \u00B7 '+fuelLogLabel(e)+'</span><small>'+dt(e.t)+' '+tm(e.t)+(e.note?' \u00B7 '+esc(e.note):'')+' \u00B7 stock '+fmt(e.after)+' L</small>'+
+        (e.type==='delivery'?'<button class="x" data-act="delFuelLog" data-id="'+e.id+'">Delete</button>':'')+'</div>'+
+        '<div class="r"><b class="'+(qty<0?'bad':(qty>0?'okc':''))+'">'+(qty>0?'+ ':(qty<0?'\u2212 ':''))+(qty?fmt(Math.abs(qty))+' L':'\u2013')+'</b></div></div>';
+    }).join(''):'<div class="empty">No stock movements yet.</div>')+'</div>';
+    return h;
+  }
+
+  /* ================= STOCK TAB (fuel + oil) ================= */
+  function oilBodyHTML(){
+    var low=S.oils.filter(isLow).length;
+    var h='<div class="nzh" style="align-items:center;margin-top:12px"><span class="mute sm">Sell, restock and review oil products</span><button class="btn2" data-act="addOilToggle">'+(ui.addOil?'Close':'+ Add product')+'</button></div>'+(ui.addOil?oilFormHTML():'')+
+      '<div class="seg three" style="margin-top:12px">'+
+      '<button data-act="oilView" data-v="sell" aria-pressed="'+(ui.oilView==='sell')+'">Sell</button>'+
+      '<button data-act="oilView" data-v="stock" aria-pressed="'+(ui.oilView==='stock')+'">Stock'+(low?' ('+low+' low)':'')+'</button>'+
+      '<button data-act="oilView" data-v="hist" aria-pressed="'+(ui.oilView==='hist')+'">History</button></div>';
+    if(ui.oilView==='stock')h+=oilStockHTML();else if(ui.oilView==='hist')h+=oilHistHTML();else h+=oilSellHTML();
+    return h;
+  }
+  function viewStock(){
+    var sv=ui.stockView||'fuel',low=lowFuels().length;
+    $('v-oil').innerHTML='<h2>Stock</h2><div class="seg">'+
+      '<button data-act="stockView" data-v="fuel" aria-pressed="'+(sv==='fuel')+'">Fuel tanks'+(low?' ('+low+' low)':'')+'</button>'+
+      '<button data-act="stockView" data-v="oil" aria-pressed="'+(sv==='oil')+'">Oil and lubricants</button></div>'+
+      (sv==='oil'?oilBodyHTML():fuelBodyHTML());
+  }
+  function oilSellHTML(){
+    var sh=S.shift;
+    if(!sh)return '<div class="card"><h3>Start a shift first</h3><p class="mute" style="margin:6px 0 0">Oil sales are counted in the shift. Start a shift in the Shift tab, then come back here.</p></div>';
+    if(!S.oils.length)return '<div class="card"><p class="mute" style="margin:0">No products yet. Tap + Add product above.</p></div>';
+    var pay=ui.oilPay||'Cash',first=S.oils[0];
+    var custs=S.customers.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+    var mine=S.oilSales.filter(function(e){return e.shift===sh.id;}).sort(function(a,b){return b.t-a.t;}).slice(0,10);
+    return '<div class="card"><label for="os_item" style="margin-top:0">Product</label><select id="os_item">'+
+        S.oils.map(function(o){return '<option value="'+o.id+'">'+esc(oilLabel(o))+' \u00B7 '+fmtQ(o.stock)+' in stock</option>';}).join('')+'</select>'+
+      '<div class="row2"><div><label for="os_q">Quantity</label><input id="os_q" type="text" inputmode="decimal" value="1"></div>'+
+      '<div><label for="os_p">Price each</label><input id="os_p" type="text" inputmode="decimal" value="'+(first.price>0?first.price:'')+'" placeholder="0"></div></div>'+
+      '<div class="line strong" style="margin-top:8px"><span>Total</span><span id="os_total">'+money(first.price>0?first.price:0)+'</span></div>'+
+      '<label>Payment</label><div class="seg" id="os_pay" style="grid-template-columns:repeat(4,1fr)">'+
+        ['Cash','UPI','Card','Credit'].map(function(p){return '<button data-act="oilPay" data-v="'+p+'" aria-pressed="'+(pay===p)+'">'+p+'</button>';}).join('')+'</div>'+
+      '<div id="os_credit" class="'+(pay==='Credit'?'':'hide')+'">'+
+        (custs.length?'<label for="os_cust">Credit customer</label><select id="os_cust">'+custs.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+' \u00B7 '+esc(c.acc)+' \u00B7 due '+money(balOf(c.id))+'</option>';}).join('')+'</select>':
+          '<p class="mute sm" style="margin:8px 0 0">No credit accounts yet. Create one in the Credit tab.</p>')+'</div>'+
+      mpSelect('os_mp','Sold by (MPD and attendant)')+
+      '<button class="go" data-act="addOil">Record oil sale</button></div>'+
+      '<h2>This shift</h2><div class="card">'+(mine.length?mine.map(oilRow).join(''):'<div class="empty">No oil sales in this shift yet.</div>')+'</div>';
+  }
+  function oilStockHTML(){
+    var h='<p class="mute sm" style="margin:10px 2px 0">Tap + Add product (top right) for a new item, or Add another pack size on a product below.</p>';
+    h+=S.oils.map(function(o){
+      var low=isLow(o);
+      return '<div class="card"><div class="nzh"><h3>'+esc(oilLabel(o))+'</h3><b class="big2 '+(low?'bad':'')+'">'+fmtQ(o.stock)+(low?' \u00B7 low':'')+'</b></div>'+
+        '<div class="row2"><div><label for="on_'+o.id+'">Name</label><input id="on_'+o.id+'" data-oil="'+o.id+'" data-f="name" value="'+esc(o.name)+'" maxlength="30"></div>'+
+        '<div><label for="op_'+o.id+'">Pack size</label><input id="op_'+o.id+'" data-oil="'+o.id+'" data-f="pack" value="'+esc(o.pack)+'" maxlength="12"></div></div>'+
+        '<div class="row2"><div><label for="or_'+o.id+'">Price each</label><input id="or_'+o.id+'" data-oil="'+o.id+'" data-f="price" type="text" inputmode="decimal" value="'+o.price+'"></div>'+
+        '<div><label for="om_'+o.id+'">Low-stock alert at</label><input id="om_'+o.id+'" data-oil="'+o.id+'" data-f="min" type="text" inputmode="decimal" value="'+o.min+'"></div></div>'+
+        '<div class="row2" style="margin-top:12px"><input data-oiladd="'+o.id+'" type="text" inputmode="decimal" placeholder="Units received" aria-label="Units received for '+esc(o.name)+'"><button class="btn2" data-act="oilAdd" data-id="'+o.id+'">Add stock</button></div>'+
+        '<div class="row2" style="margin-top:8px"><input data-oilset="'+o.id+'" type="text" inputmode="decimal" placeholder="Counted stock" aria-label="Counted stock for '+esc(o.name)+'"><button class="btn2" data-act="oilSet" data-id="'+o.id+'">Set count</button></div>'+
+        '<div style="margin-top:10px;display:flex;gap:18px"><button class="x" data-act="oilVariant" data-id="'+o.id+'">Add another pack size</button><button class="x" data-act="delOilProd" data-id="'+o.id+'">Remove product</button></div></div>';
+    }).join('');
+    return h;
+  }
+  function oilHistHTML(){
+    var k=dayKey(Date.now()),T=S.oilSales.filter(function(e){return dayKey(e.t)===k;}),by={},tot=0;
+    T.forEach(function(e){var key=oilLabel(e);by[key]=by[key]||{q:0,A:0};by[key].q=r2(by[key].q+e.q);by[key].A=r2(by[key].A+e.A);tot=r2(tot+e.A);});
+    var names=Object.keys(by);
+    var h='<h2>Today</h2><div class="card">'+(names.length?names.map(function(n){return '<div class="line"><span>'+esc(n)+' \u00D7 '+fmtQ(by[n].q)+'</span><span>'+money(by[n].A)+'</span></div>';}).join('')+'<div class="line strong"><span>Total oil sales</span><span>'+money(tot)+'</span></div>':'<div class="empty">No oil sold today.</div>')+'</div>';
+    var L=S.oilSales.slice().sort(function(a,b){return b.t-a.t;}).slice(0,100);
+    return h+'<h2>Recent sales</h2><div class="card">'+(L.length?L.map(oilRow).join(''):'<div class="empty">No oil sales yet.</div>')+'</div>';
+  }
+
+  /* ================= DAY REPORT ================= */
+  var DAY_KEYS=['lit','test','sale','oil','total','credit','exp','rec','expect','cash','upi','card','recv','diff','short','excess'];
+  function ln(label,val,cls){return '<div class="line'+(cls?' '+cls:'')+'"><span>'+label+'</span><span>'+val+'</span></div>';}
+  function shiftTotals(s){
+    var r=s.res,t={by:{},test:0,short:0,excess:0};
+    mpsOf(s).forEach(function(m){t.short=r2(t.short+shortOf(m.diff));t.excess=r2(t.excess+excessOf(m.diff));});
+    t.lit=r.lit||0;t.sale=r.sale||0;t.oil=r.oil||0;t.total=r2(t.sale+t.oil);t.credit=r.credit||0;t.exp=r.exp||0;t.rec=r.rec||0;
+    t.expect=r.expect||0;t.cash=r.cash||0;t.upi=r.upi||0;t.card=r.card||0;t.recv=r.recv||0;t.diff=r.diff||0;
+    (r.rows||[]).forEach(function(x){
+      t.test=r2(t.test+(x.T||0));
+      var b=t.by[x.fuel]=t.by[x.fuel]||{L:0,A:0};b.L=r2(b.L+x.L);b.A=r2(b.A+x.A);
+    });
+    return t;
+  }
+  /* everything for one calendar day, from the shifts that started on it */
+  function dayData(key){
+    var shifts=S.shifts.filter(function(s){return s.date===key;}).sort(function(a,b){return a.t0-b.t0;});
+    var ids={},T={by:{}};
+    DAY_KEYS.forEach(function(k){T[k]=0;});
+    var items=shifts.map(function(s){
+      ids[s.id]=true;var t=shiftTotals(s);
+      DAY_KEYS.forEach(function(k){T[k]=r2(T[k]+t[k]);});
+      Object.keys(t.by).forEach(function(f){var b=T.by[f]=T.by[f]||{L:0,A:0};b.L=r2(b.L+t.by[f].L);b.A=r2(b.A+t.by[f].A);});
+      return {s:s,t:t};
+    });
+    var nz={},order=[];
+    shifts.forEach(function(s){(s.res.rows||[]).forEach(function(x){
+      if(!nz[x.id]){nz[x.id]={name:x.name,fuel:x.fuel,mpd:x.mpd,first:x.open,last:x.close,L:0,T:0,A:0};order.push(x.id);}
+      var n=nz[x.id];n.last=x.close;n.L=r2(n.L+x.L);n.T=r2(n.T+(x.T||0));n.A=r2(n.A+x.A);
+    });});
+    var oil={},oilQ=0;
+    S.oilSales.forEach(function(e){
+      if(!ids[e.shift])return;
+      var k=oilLabel(e);oil[k]=oil[k]||{q:0,A:0};oil[k].q=r2(oil[k].q+e.q);oil[k].A=r2(oil[k].A+e.A);oilQ=r2(oilQ+e.q);
+    });
+    var cs={},pays=[];
+    S.ledger.forEach(function(e){
+      if(!ids[e.shift])return;
+      var c=custBy(e.cust)||{name:'Customer',acc:''};
+      if(e.type==='sale'){
+        var o=cs[e.cust]=cs[e.cust]||{name:c.name,acc:c.acc,L:0,oilA:0,A:0};
+        if(e.item)o.oilA=r2(o.oilA+e.A);else o.L=r2(o.L+e.L);
+        o.A=r2(o.A+e.A);
+      }else if(e.type==='pay'){pays.push({t:e.t,name:c.name,acc:c.acc,mode:e.mode||'Cash',A:e.A,att:e.att||''});}
+    });
+    var ex={},exTot=0;
+    S.expenses.forEach(function(e){if(!ids[e.shift])return;ex[e.cat]=r2((ex[e.cat]||0)+e.A);exTot=r2(exTot+e.A);});
+    var attRows=S.staff.filter(function(x){return x.active!==false||attBy(x.id,key);}).map(function(x){
+      var a=attBy(x.id,key)||{};return {name:x.name,role:x.role||'',st:a.st||'',tin:a.tin||'',tout:a.tout||'',shift:a.shift||'',note:a.note||''};
+    });
+    var moves=S.fuelLog.filter(function(e){return e.type!=='sale'&&dayKey(e.t)===key;});
+    return {key:key,items:items,shifts:shifts,T:T,nz:nz,order:order,oil:oil,oilQ:oilQ,credit:cs,pays:pays,ex:ex,exTot:exTot,moves:moves,att:attRows};
+  }
+  function longDate(key){return new Date(key+'T00:00:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+  function repSeg(){
+    var v=ui.repView||'shifts';
+    return '<div class="seg" style="margin-top:8px"><button data-act="repView" data-v="shifts" aria-pressed="'+(v==='shifts')+'">Shifts</button><button data-act="repView" data-v="day" aria-pressed="'+(v==='day')+'">Day report</button></div>';
+  }
+  function dayReportHTML(){
+    var key=ui.repDate||dayKey(Date.now()),d=dayData(key),T=d.T;
+    var h='<h2>Day sales report</h2><div class="card"><label for="dr_date" style="margin-top:0">Date</label><input id="dr_date" type="date" value="'+key+'"></div>';
+    if(S.shift&&S.shift.date===key)h+='<div class="card" style="border-color:var(--warn);border-width:2px"><b class="warnc">A shift is still open</b><div class="sm" style="margin-top:4px">The '+esc(S.shift.name)+' shift is not in this report until you close it.</div></div>';
+    if(!d.items.length)return h+'<div class="card empty">No closed shifts on this date.</div>';
+    h+='<h2>Shifts</h2>'+d.items.map(function(x){
+      var s=x.s,t=x.t;
+      return '<div class="card"><div class="nzh"><h3>'+esc(s.name)+'</h3><span class="mute sm">'+tm(s.t0)+' \u2192 '+tm(s.t1)+'</span></div>'+
+        (s.att?'<div class="mute sm">'+esc(s.att)+'</div>':'')+
+        ln('Fuel sold',fmt(t.lit)+' L')+ln('Fuel sale',money(t.sale))+(t.oil?ln('Oil sales',money(t.oil)):'')+
+        ln('Total sales',money(t.total),'strong')+ln('Credit given',money(t.credit))+ln('Expenses paid',money(t.exp))+
+        ln('Received',money(t.recv))+ln('Difference',diffText(t.diff),'strong '+diffCls(t.diff))+'</div>';
+    }).join('');
+    h+='<h2>Day total</h2><div class="card">'+
+      ln('Fuel sold',fmt(T.lit)+' L')+(T.test?ln('Test litres (not sold)',fmt(T.test)+' L'):'')+
+      ln('Fuel sale',money(T.sale))+ln('Oil sales',money(T.oil))+ln('Total sales',money(T.total),'strong')+
+      ln('Credit given',money(T.credit))+ln('Expenses paid',money(T.exp))+ln('Old dues collected',money(T.rec))+
+      ln('Expected collection',money(T.expect),'strong')+
+      ln('Cash in hand',money(T.cash))+ln('UPI',money(T.upi))+ln('Card',money(T.card))+
+      ln('Total received',money(T.recv),'strong')+ln('Difference',diffText(T.diff),'strong '+diffCls(T.diff))+(T.short?ln('Short amount (all attendants)',money(T.short),'bad'):'')+(T.excess?ln('Excess amount (all attendants)',money(T.excess),'warnc'):'')+'</div>';
+    h+='<h2>Sales by fuel</h2><div class="card">'+S.fuels.filter(function(f){return T.by[f.id];}).map(function(f){
+      return ln('<i class="dot" style="--c:var('+f.c+')"></i>'+esc(f.name)+' \u00B7 '+fmt(T.by[f.id].L)+' L',money(T.by[f.id].A));
+    }).join('')+'</div>';
+    h+='<h2>By attendant</h2><div class="card">'+d.items.map(function(x){return mpsOf(x.s).map(function(m){
+      return '<div class="item"><div class="l"><span>'+esc(m.att||'Attendant')+'</span><small>'+esc(x.s.name)+(m.id!=='all'?' \u00B7 '+esc(m.name):'')+' \u00B7 '+fmt(m.lit)+' L</small></div><div class="r"><b>'+money(m.sale+(m.oil||0))+'</b><small class="'+diffCls(m.diff)+'">'+diffText(m.diff)+'</small></div></div>';
+    }).join('');}).join('')+'</div>';
+    h+='<h2>Meter readings for the day</h2><div class="card"><div class="tr h"><span>Nozzle</span><span>First \u2192 Last reading</span><span>Litres</span><span>Amount</span></div>'+
+      d.order.map(function(id){var n=d.nz[id];
+        return '<div class="tr"><span>'+esc(n.name)+'<br><small class="mute">'+esc((n.mpd?mpdName(n.mpd)+' \u00B7 ':'')+fuelBy(n.fuel).name+(n.T>0?' \u00B7 test '+fmt(n.T)+' L':''))+'</small></span><span>'+fmt(n.first)+' \u2192 '+fmt(n.last)+'</span><span>'+fmt(n.L)+'</span><span>'+money(n.A)+'</span></div>';
+      }).join('')+'</div>';
+    var oilNames=Object.keys(d.oil);
+    if(oilNames.length)h+='<h2>Oil sales</h2><div class="card">'+oilNames.map(function(k){return ln(esc(k)+' \u00D7 '+fmtQ(d.oil[k].q),money(d.oil[k].A));}).join('')+ln('Total oil sales',money(T.oil),'strong')+'</div>';
+    var cn=Object.keys(d.credit);
+    if(cn.length)h+='<h2>Credit given</h2><div class="card">'+cn.map(function(k){var c=d.credit[k];return ln(esc(c.name)+' \u00B7 '+esc(c.acc)+(c.L?' \u00B7 '+fmt(c.L)+' L':'')+(c.oilA?' \u00B7 oil':''),money(c.A));}).join('')+ln('Total credit given',money(T.credit),'strong')+'</div>';
+    if(d.pays.length)h+='<h2>Old dues collected</h2><div class="card">'+d.pays.map(function(p){return ln(esc(p.name)+' \u00B7 '+esc(p.mode)+' \u00B7 '+tm(p.t),money(p.A));}).join('')+'</div>';
+    var en=Object.keys(d.ex);
+    if(en.length)h+='<h2>Expenses</h2><div class="card">'+en.map(function(k){return ln(esc(k),money(d.ex[k]));}).join('')+ln('Total expenses',money(d.exTot),'strong')+'</div>';
+    h+='<h2>Fuel stock</h2><div class="card">'+(d.moves.length?d.moves.map(function(e){
+      var q=e.qty||0;return ln(esc(fuelBy(e.fuel).name)+' \u00B7 '+fuelLogLabel(e)+' \u00B7 '+tm(e.t),q?((q>0?'+ ':'\u2212 ')+fmt(Math.abs(q))+' L'):'\u2013');
+    }).join(''):'<div class="empty">No deliveries or dip readings on this day.</div>')+fuelStockLines()+'</div>';
+    var ac=attCounts(d.att);
+    h+='<h2>Staff attendance</h2><div class="card">'+(d.att.length?d.att.map(function(r){
+      return ln(esc(r.name)+' \u00B7 '+esc(r.role),'<span class="'+stCls(r.st)+'">'+(r.st?ST_LABEL[r.st]:'Not marked')+'</span>'+((r.tin||r.tout)?' <small class="mute">'+esc(r.tin)+(r.tout?'\u2013'+esc(r.tout):'')+'</small>':''));
+    }).join('')+ln('Present '+ac.P+' \u00B7 Half day '+ac.H+' \u00B7 Absent '+ac.A+' \u00B7 Leave '+ac.L+(ac.none?' \u00B7 Not marked '+ac.none:''),'','mute'):'<div class="empty">No staff added yet. Add them in the Staff tab.</div>')+'</div>';
+    h+='<div class="row2" style="margin-top:12px"><button class="go exp-btn" style="margin-top:0" data-act="exportDay\" data-id="'+key+'">Export day report</button><button class="btn2" data-act="shareDay" data-id="'+key+'">Share summary</button></div>'+
+      '<div style="margin-top:10px"><button class="btn2" data-act="copyDay" data-id="'+key+'">Copy summary</button></div>';
+    return h;
+  }
+  function daySummaryText(d){
+    var T=d.T,L=[(S.pump||'Pump Desk')+' \u2013 Day sales report',longDate(d.key),''];
+    d.items.forEach(function(x){
+      var t=x.t;
+      L.push(x.s.name+' ('+tm(x.s.t0)+' to '+tm(x.s.t1)+(x.s.att?', '+x.s.att:'')+')');
+      L.push('  Fuel '+fmt(t.lit)+' L, '+money(t.sale)+(t.oil?', oil '+money(t.oil):'')+', total '+money(t.total));
+      L.push('  Received '+money(t.recv)+' \u00B7 '+diffText(t.diff));
+    });
+    L.push('','DAY TOTAL');
+    S.fuels.forEach(function(f){if(T.by[f.id])L.push(f.name+': '+fmt(T.by[f.id].L)+' L, '+money(T.by[f.id].A));});
+    L.push('Fuel sale: '+money(T.sale),'Oil sales: '+money(T.oil),'Total sales: '+money(T.total),
+      'Credit given: '+money(T.credit),'Expenses: '+money(T.exp),'Old dues collected: '+money(T.rec),
+      'Expected collection: '+money(T.expect),
+      'Cash '+money(T.cash)+' \u00B7 UPI '+money(T.upi)+' \u00B7 Card '+money(T.card),
+      'Total received: '+money(T.recv),'Result: '+diffText(T.diff));
+    if(d.att.length){
+      var ac=attCounts(d.att);
+      L.push('','STAFF ATTENDANCE','Present '+ac.P+', half day '+ac.H+', absent '+ac.A+', leave '+ac.L+(ac.none?', not marked '+ac.none:''));
+      d.att.forEach(function(r){L.push('  '+r.name+' ('+r.role+'): '+(r.st?ST_LABEL[r.st]:'Not marked')+(r.tin?' '+r.tin+(r.tout?'-'+r.tout:''):''));});
+    }
+    return L.join('\n');
+  }
+  /* one sheet, the shifts side by side with a day total, then the detail blocks under it */
+  function dayRows(d){
+    var T=d.T,items=d.items,rows=[];
+    var names=items.map(function(x,i){return x.s.name+(items.filter(function(y){return y.s.name===x.s.name;}).length>1?' '+(i+1):'');});
+    function line(label,k,fn){return [label].concat(items.map(function(x){return fn?fn(x.t[k]):x.t[k];}),[fn?fn(T[k]):T[k]]);}
+    function title(t){rows.push([],[],['\u25A0 '+t]);}
+    rows.push([S.pump||'Pump Desk'],['Final day sales report'],[],['Date',longDate(d.key)],['Shifts included',items.length],[],['Shift','Attendants','Start','Closing']);
+    items.forEach(function(x){rows.push([x.s.name,x.s.att||'',dtf(x.s.t0),dtf(x.s.t1)]);});
+    rows.push([],['Item'].concat(names,['Day total']));
+    [['Fuel sold (litres)','lit'],['Test litres (not sold)','test'],['Fuel sale','sale'],['Oil sales','oil'],['Total sales','total'],['Credit given','credit'],['Expenses paid','exp'],['Old dues collected','rec'],['Expected collection','expect'],['Cash in hand','cash'],['UPI','upi'],['Card','card'],['Total received','recv'],['Net difference (short -, excess +)','diff'],['Short amount','short'],['Excess amount','excess']].forEach(function(p){rows.push(line(p[0],p[1]));});
+    rows.push(line('Status','diff',diffText));
+    S.fuels.forEach(function(f){
+      if(!T.by[f.id])return;
+      rows.push([f.name+' litres'].concat(items.map(function(x){return (x.t.by[f.id]||{L:0}).L;}),[T.by[f.id].L]));
+      rows.push([f.name+' amount'].concat(items.map(function(x){return (x.t.by[f.id]||{A:0}).A;}),[T.by[f.id].A]));
+    });
+
+    title('BY MPD AND ATTENDANT');
+    rows.push(['Shift','MPD','Attendant','Litres sold','Fuel sale','Oil sales','Credit given','Expenses paid','Old dues collected','Expected collection','Cash in hand','UPI','Card','Total received','Difference','Short amount','Excess amount','Start time','Closing time']);
+    items.forEach(function(x){mpsOf(x.s).forEach(function(m){
+      rows.push([x.s.name,m.id==='all'?'':m.name,m.att||'',m.lit,m.sale,m.oil||0,m.credit,m.exp,m.rec,m.expect,m.cash,m.upi,m.card,m.recv,m.diff,shortOf(m.diff),excessOf(m.diff),dtf(x.s.t0),dtf(m.t1||x.s.t1)]);
+    });});
+
+    title('METER READINGS FOR THE DAY');
+    rows.push(['Nozzle','MPD','Fuel','First reading of the day','Last reading of the day','Test litres','Litres sold','Amount']);
+    d.order.forEach(function(id){var n=d.nz[id];rows.push([n.name,n.mpd?mpdName(n.mpd):'',fuelBy(n.fuel).name,n.first,n.last,n.T,n.L,n.A]);});
+    rows.push(['Total','','','','',T.test,T.lit,T.sale]);
+
+    title('OIL SALES BY PRODUCT');
+    rows.push(['Product','Quantity','Amount']);
+    var on=Object.keys(d.oil);
+    on.forEach(function(k){rows.push([k,d.oil[k].q,d.oil[k].A]);});
+    if(!on.length)rows.push(['No oil sold on this day']);
+    rows.push(['Total',d.oilQ,T.oil]);
+
+    title('CREDIT SALES BY CUSTOMER');
+    rows.push(['Account','Customer','Fuel litres','Oil amount','Total credit']);
+    var cn=Object.keys(d.credit);
+    cn.forEach(function(k){var c=d.credit[k];rows.push([c.acc,c.name,c.L,c.oilA,c.A]);});
+    if(!cn.length)rows.push(['No credit sales on this day']);
+    rows.push(['Total','','','',T.credit]);
+
+    title('OLD DUES COLLECTED');
+    rows.push(['Date and time','Account','Customer','Paid by','Received by','Amount']);
+    d.pays.forEach(function(p){rows.push([dtf(p.t),p.acc,p.name,p.mode,p.att,p.A]);});
+    if(!d.pays.length)rows.push(['No old dues collected on this day']);
+    rows.push(['Total','','','','',T.rec]);
+
+    title('EXPENSES BY CATEGORY');
+    rows.push(['Category','Amount']);
+    var en=Object.keys(d.ex);
+    en.forEach(function(k){rows.push([k,d.ex[k]]);});
+    if(!en.length)rows.push(['No expenses on this day']);
+    rows.push(['Total',d.exTot]);
+
+    title('FUEL STOCK');
+    rows.push(['Date and time','Fuel','Type','Litres','Stock after','Note']);
+    d.moves.forEach(function(e){rows.push([dtf(e.t),fuelBy(e.fuel).name,fuelLogLabel(e),e.qty||0,e.after,e.note||'']);});
+    if(!d.moves.length)rows.push(['No deliveries or dip readings on this day']);
+    rows.push([],['Fuel tanks now','Stock (book)','Capacity','Low-stock alert at']);
+    var sold=fuelSold();
+    fuelsInUse().forEach(function(f){var fz=S.fstock[f.id],nw=fuelNow(f.id,sold);rows.push([f.name,nw==null?'Not set':nw,fz.cap||'',fz.min||'']);});
+    title('STAFF ATTENDANCE');
+    rows.push(['Name','Role','Status','Shift','In time','Out time','Note']);
+    d.att.forEach(function(r){rows.push([r.name,r.role,r.st?ST_LABEL[r.st]:'Not marked',r.shift,r.tin,r.tout,r.note]);});
+    if(!d.att.length)rows.push(['No staff added']);
+    var ac=attCounts(d.att);
+    rows.push(['Present',ac.P],['Half day',ac.H],['Absent',ac.A],['Leave',ac.L],['Not marked',ac.none]);
+    return {rows:rows,widths:[34,16,22,16,16,14,14,14,16,18,13,12,12,14,13,14,14,22,22]};
+  }
+
+  /* ================= STAFF ATTENDANCE ================= */
+  var ST_LABEL={P:'Present',A:'Absent',H:'Half day',L:'Leave'};
+  var ROLES=['Housekeeper','Attendant','Cashier','Manager','Other'];
+  function staffBy(id){return S.staff.filter(function(x){return x.id===id;})[0];}
+  function attBy(sid,date){return S.attend.filter(function(a){return a.sid===sid&&a.date===date;})[0];}
+  function setAtt(sid,date,patch){
+    var a=attBy(sid,date);
+    if(!a){a={sid:sid,date:date,st:'',tin:'',tout:'',shift:'',note:''};S.attend.push(a);}
+    Object.keys(patch).forEach(function(k){a[k]=patch[k];});
+    save();return a;
+  }
+  function stCls(st){return st==='P'?'okc':st==='A'?'bad':st==='H'?'warnc':'mute';}
+  function attCounts(rows){
+    var c={P:0,H:0,A:0,L:0,none:0};
+    rows.forEach(function(r){if(r.st&&c[r.st]!==undefined)c[r.st]++;else c.none++;});
+    return c;
+  }
+  function activeStaff(){return S.staff.filter(function(s){return s.active!==false;});}
+
+  function viewStaff(){
+    var sv=ui.stView||'att';
+    $('v-staff').innerHTML='<h2>Staff attendance</h2><div class="seg three">'+
+      '<button data-act="stView" data-v="att" aria-pressed="'+(sv==='att')+'">Attendance</button>'+
+      '<button data-act="stView" data-v="month" aria-pressed="'+(sv==='month')+'">Month</button>'+
+      '<button data-act="stView" data-v="staff" aria-pressed="'+(sv==='staff')+'">Staff</button></div>'+
+      (sv==='month'?monthHTML():sv==='staff'?staffListHTML():attDayHTML());
+  }
+  function attDayHTML(){
+    var date=ui.attDate||dayKey(Date.now()),list=activeStaff();
+    var h='<div class="card"><label for="at_date" style="margin-top:0">Date</label><input id="at_date" type="date" value="'+date+'"></div>';
+    if(!list.length)return h+'<div class="card"><p class="mute" style="margin:0">No staff yet. Open the Staff tab above and add your housekeepers.</p></div>';
+    var rows=list.map(function(s){var a=attBy(s.id,date);return {st:a?a.st:''};}),c=attCounts(rows);
+    h+='<div class="stats" style="margin-top:10px"><div class="stat"><small>Present</small><b>'+c.P+'</b></div><div class="stat"><small>Absent</small><b>'+c.A+'</b></div>'+
+      '<div class="stat"><small>Half day or leave</small><b>'+(c.H+c.L)+'</b></div><div class="stat"><small>Not marked yet</small><b>'+c.none+'</b></div></div>'+
+      '<div style="margin-top:10px"><button class="btn2" data-act="attAllPresent">Mark everyone not yet marked as present</button></div>';
+    h+=list.map(function(s){
+      var a=attBy(s.id,date)||{},st=a.st||'';
+      return '<div class="card"><div class="nzh"><h3>'+esc(s.name)+'</h3><span class="mute sm">'+esc(s.role||'')+'</span></div>'+
+        '<div class="seg" style="grid-template-columns:repeat(4,1fr);margin-top:10px">'+
+          ['P','A','H','L'].map(function(k){return '<button data-act="attSet" data-id="'+s.id+'" data-v="'+k+'" aria-pressed="'+(st===k)+'">'+ST_LABEL[k]+'</button>';}).join('')+'</div>'+
+        ((st==='P'||st==='H')?
+          '<div class="row2"><div><label for="ai_'+s.id+'">In time</label><input id="ai_'+s.id+'" data-at="tin" data-sid="'+s.id+'" type="time" value="'+esc(a.tin||'')+'"></div>'+
+          '<div><label for="ao_'+s.id+'">Out time</label><input id="ao_'+s.id+'" data-at="tout" data-sid="'+s.id+'" type="time" value="'+esc(a.tout||'')+'"></div></div>'+
+          '<label for="as_'+s.id+'">Shift worked</label><select id="as_'+s.id+'" data-at="shift" data-sid="'+s.id+'"><option value="">Not set</option>'+
+          SHIFTS.map(function(n){return '<option'+(a.shift===n?' selected':'')+'>'+n+'</option>';}).join('')+'</select>':'')+
+        '<label for="an_'+s.id+'">Note (optional)</label><input id="an_'+s.id+'" data-at="note" data-sid="'+s.id+'" type="text" maxlength="80" value="'+esc(a.note||'')+'"></div>';
+    }).join('');
+    return h;
+  }
+
+  /* month */
+  function monthInfo(m){var y=Number(m.slice(0,4)),mo=Number(m.slice(5,7));return {y:y,mo:mo,n:new Date(y,mo,0).getDate(),first:new Date(y,mo-1,1).getDay()};}
+  function monthLabel(m){var i=monthInfo(m);return new Date(i.y,i.mo-1,1).toLocaleDateString(undefined,{month:'long',year:'numeric'});}
+  function monthData(m){
+    var mi=monthInfo(m),tk=dayKey(Date.now()),rows=[];
+    S.staff.forEach(function(s){
+      var recs=S.attend.filter(function(a){return a.sid===s.id&&a.date.slice(0,7)===m;});
+      if(s.active===false&&!recs.length)return;
+      var c={P:0,H:0,A:0,L:0},byDay={};
+      recs.forEach(function(a){if(a.st&&c[a.st]!==undefined){c[a.st]++;byDay[Number(a.date.slice(8,10))]=a;}});
+      var upto=mi.n;
+      if(m===tk.slice(0,7))upto=Number(tk.slice(8,10));else if(m>tk.slice(0,7))upto=0;
+      var marked=0;for(var d=1;d<=upto;d++){if(byDay[d])marked++;}
+      var days=c.P+c.H/2;
+      var wages=s.wage>0?r2(days*s.wage):0;
+      var nm=String(s.name||'').trim().toLowerCase(),sht=0,exc=0;
+      S.shifts.forEach(function(sh){
+        if(!sh.date||sh.date.slice(0,7)!==m)return;
+        mpsOf(sh).forEach(function(mp){
+          if(String(mp.att||'').trim().toLowerCase()!==nm)return;
+          sht=r2(sht+shortOf(mp.diff));exc=r2(exc+excessOf(mp.diff));
+        });
+      });
+      var dl=S.deds.filter(function(x){return x.sid===s.id&&x.date.slice(0,7)===m;}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+      var adv=0,oth=0;
+      dl.forEach(function(x){if(x.type==='adv')adv=r2(adv+x.A);else oth=r2(oth+x.A);});
+      var bal=r2(wages-sht+(S.exCredit?exc:0)-adv-oth);
+      rows.push({s:s,c:c,days:days,byDay:byDay,unmarked:Math.max(0,upto-marked),wages:wages,sht:sht,exc:exc,adv:adv,oth:oth,bal:bal,dl:dl});
+    });
+    return {m:m,mi:mi,rows:rows};
+  }
+  function payLines(r){
+    function ln(a,b,c){return '<div class="line'+(c?' '+c:'')+'"><span>'+a+'</span><span>'+b+'</span></div>';}
+    return ln('Days worked',r.days)+ln('Wages'+(r.s.wage>0?' ('+r.days+' \u00D7 '+money(r.s.wage)+')':''),money(r.wages))+
+      ln('Short',r.sht?'\u2212 '+money(r.sht):money(0),r.sht?'bad':'')+
+      ln('Excess'+(S.exCredit?'':' (not counted)'),(S.exCredit&&r.exc?'+ ':'')+money(r.exc),(S.exCredit&&r.exc)?'okc':'')+
+      ln('Advance',r.adv?'\u2212 '+money(r.adv):money(0))+
+      ln('Other expenses',r.oth?'\u2212 '+money(r.oth):money(0))+
+      ln('Balance amount',money(r.bal),'strong '+(r.bal<0?'bad':'okc'));
+  }
+  function dedForm(r,m){
+    var tk=dayKey(Date.now()),def=tk.slice(0,7)===m?tk:m+'-01',id=r.s.id;
+    return '<div class="sep"><h3 style="margin-top:8px">Advance and other expenses</h3>'+
+      (r.dl.length?r.dl.map(function(x){
+        return '<div class="line"><span>'+(x.type==='adv'?'Advance':'Expense')+' \u00B7 '+dt(x.date+'T00:00:00')+(x.note?' \u00B7 '+esc(x.note):'')+'</span><span>'+money(x.A)+' <button class="x" data-act="delDed" data-id="'+x.id+'" data-sid="'+id+'">Delete</button></span></div>';
+      }).join(''):'<p class="mute sm" style="margin:6px 0 0">Nothing recorded this month.</p>')+
+      '<div class="row2"><div><label for="dd_t_'+id+'">Type</label><select id="dd_t_'+id+'"><option value="adv">Advance</option><option value="oth">Other expense</option></select></div>'+
+      '<div><label for="dd_a_'+id+'">Amount</label><input id="dd_a_'+id+'" type="text" inputmode="decimal" placeholder="0"></div></div>'+
+      '<div class="row2"><div><label for="dd_d_'+id+'">Date</label><input id="dd_d_'+id+'" type="date" value="'+def+'"></div>'+
+      '<div><label for="dd_n_'+id+'">Note (optional)</label><input id="dd_n_'+id+'" type="text" maxlength="40"></div></div>'+
+      '<button class="btn2" style="margin-top:12px" data-act="addDed" data-id="'+id+'">Add</button></div>';
+  }
+  function monthHTML(){
+    var m=ui.attMonth||dayKey(Date.now()).slice(0,7),md=monthData(m);
+    var h='<div class="card"><label for="am_month" style="margin-top:0">Month</label><input id="am_month" type="month" value="'+m+'"></div>';
+    if(!md.rows.length)return h+'<div class="card empty">No staff or attendance for this month yet.</div>';
+    var tot={wages:0,sht:0,exc:0,adv:0,oth:0,bal:0};
+    md.rows.forEach(function(r){Object.keys(tot).forEach(function(k){tot[k]=r2(tot[k]+r[k]);});});
+    h+='<div class="card"><div class="tr6 h"><span>Name</span><span>Pres.</span><span>Half</span><span>Abs.</span><span>Leave</span><span>Days</span></div>'+
+      md.rows.map(function(r){
+        return '<div class="tr6"><span>'+esc(r.s.name)+(r.unmarked?'<br><small class="mute">'+r.unmarked+' not marked</small>':'')+'</span><span>'+r.c.P+'</span><span>'+r.c.H+'</span><span>'+r.c.A+'</span><span>'+r.c.L+'</span><span><b>'+r.days+'</b></span></div>';
+      }).join('')+'</div>';
+    h+='<h2>Pay summary</h2><div class="card"><div class="tr h" style="grid-template-columns:1.4fr 1fr 1fr 1fr"><span>Name</span><span>Wages</span><span>Cuts</span><span>Balance</span></div>'+
+      md.rows.map(function(r){var cuts=r2(r.sht+r.adv+r.oth-(S.exCredit?r.exc:0));return '<div class="tr" style="grid-template-columns:1.4fr 1fr 1fr 1fr"><span>'+esc(r.s.name)+'</span><span>'+fmt(r.wages)+'</span><span>'+fmt(cuts)+'</span><span><b class="'+(r.bal<0?'bad':'')+'">'+fmt(r.bal)+'</b></span></div>';}).join('')+
+      '<div class="line strong sep"><span>Total balance</span><span>'+money(tot.bal)+'</span></div>'+
+      '<div class="line"><span class="mute sm">Short '+money(tot.sht)+' \u00B7 Excess '+money(tot.exc)+' \u00B7 Advance '+money(tot.adv)+' \u00B7 Other '+money(tot.oth)+'</span></div>'+
+      '<label class="chk" style="margin-top:10px"><input type="checkbox" id="am_exc"'+(S.exCredit?' checked':'')+'>Count excess in the staff member\'s favour</label>'+
+      '<p class="mute sm" style="margin:6px 0 0">Short and excess come from closed shifts where the attendant name matches the staff name. Balance = wages \u2212 short \u2212 advance \u2212 other expenses'+(S.exCredit?' + excess':'')+'.</p></div>';
+    h+=md.rows.map(function(r){
+      var cells='';
+      ['S','M','T','W','T','F','S'].forEach(function(x){cells+='<span class="dayh">'+x+'</span>';});
+      for(var i=0;i<md.mi.first;i++)cells+='<span></span>';
+      for(var d=1;d<=md.mi.n;d++){var a=r.byDay[d];cells+='<span class="dayb'+(a?' '+a.st:'')+'">'+d+'</span>';}
+      return '<details class="card"'+(ui.openStaff===r.s.id?' open':'')+'><summary><span><b>'+esc(r.s.name)+'</b><small>'+esc(r.s.role||'')+' \u00B7 '+r.days+(r.days===1?' day':' days')+' worked</small></span>'+'<span class="r"><b class="'+(r.bal<0?'bad':'')+'">'+money(r.bal)+'</b><small>balance</small></span></summary><div class="body">'+
+        '<div class="daygrid">'+cells+'</div>'+
+        '<p class="mute sm" style="margin:8px 0 0">Green present, orange half day, red absent, grey leave.'+(r.s.wage>0?' Wages are days worked \u00D7 '+money(r.s.wage)+' per day.':' Set a daily wage in the Staff tab to calculate wages.')+'</p>'+
+        '<div class="sep" style="margin-top:10px">'+payLines(r)+'</div>'+dedForm(r,m)+'</div></details>';
+    }).join('');
+    h+='<div class="row2" style="margin-top:12px"><button class="go exp-btn" style="margin-top:0" data-act="exportAtt" data-id="'+m+'">Export month</button><button class="btn2" data-act="shareAtt" data-id="'+m+'">Share summary</button></div>'+
+      '<div style="margin-top:10px"><button class="btn2" data-act="copyAtt" data-id="'+m+'">Copy summary</button></div>';
+    return h;
+  }
+  function attSummaryText(md){
+    var L=[(S.pump||'Pump Desk')+' \u2013 Staff attendance',monthLabel(md.m),''];
+    md.rows.forEach(function(r){
+      L.push(r.s.name+' ('+(r.s.role||'')+'): '+r.days+(r.days===1?' day':' days')+' \u00B7 present '+r.c.P+', half '+r.c.H+', absent '+r.c.A+', leave '+r.c.L+(r.unmarked?', not marked '+r.unmarked:'')+(r.wages?' \u00B7 wages '+money(r.wages):''));
+      L.push('   Short '+money(r.sht)+', excess '+money(r.exc)+', advance '+money(r.adv)+', other expenses '+money(r.oth)+' \u00B7 balance '+money(r.bal));
+    });
+    return L.join('\n');
+  }
+  function monthRows(md){
+    var rows=[],n=md.mi.n,days=[],wk=[],i;
+    for(i=1;i<=n;i++){days.push(i);wk.push(['S','M','T','W','T','F','S'][new Date(md.mi.y,md.mi.mo-1,i).getDay()]);}
+    rows.push([S.pump||'Pump Desk'],['Staff attendance'],[],['Month',monthLabel(md.m)],['Legend','P present, H half day, A absent, L leave'],['Balance','Wages - short - advance - other expenses'+(S.exCredit?' + excess':'')],[]);
+    rows.push(['',''].concat(wk));
+    rows.push(['Name','Role'].concat(days,['Present','Half days','Absent','Leave','Days worked','Not marked','Daily wage','Wages','Short','Excess','Advance','Other expenses','Balance']));
+    md.rows.forEach(function(r){
+      rows.push([r.s.name,r.s.role||''].concat(days.map(function(d){var a=r.byDay[d];return a?a.st:'';}),[r.c.P,r.c.H,r.c.A,r.c.L,r.days,r.unmarked,r.s.wage||'',r.wages||'',r.sht||0,r.exc||0,r.adv||0,r.oth||0,r.bal]));
+    });
+    return {rows:rows,widths:[24,14].concat(days.map(function(){return 4;}),[9,10,9,8,12,11,11,12,10,10,10,15,12])};
+  }
+
+  /* staff list */
+  function staffFormHTML(){
+    return '<div class="card"><h3>New staff</h3>'+
+      '<label for="sf_name">Name</label><input id="sf_name" type="text" maxlength="40">'+
+      '<label for="sf_role">Role</label><select id="sf_role">'+ROLES.map(function(r){return '<option>'+r+'</option>';}).join('')+'</select>'+
+      '<div class="row2"><div><label for="sf_phone">Phone (optional)</label><input id="sf_phone" type="text" inputmode="tel" maxlength="20"></div>'+
+      '<div><label for="sf_wage">Daily wage (optional)</label><input id="sf_wage" type="text" inputmode="decimal" placeholder="0"></div></div>'+
+      '<button class="go" data-act="saveStaff">Add staff</button></div>';
+  }
+  function staffListHTML(){
+    var h='<div style="margin-top:12px"><button class="btn2" data-act="addStaffToggle">'+(ui.addStaff?'Cancel':'Add staff')+'</button></div>';
+    if(ui.addStaff)h+=staffFormHTML();
+    if(!S.staff.length)return h+'<div class="card"><p class="mute" style="margin:0">No staff yet. Add your housekeepers here, then mark their attendance each day.</p></div>';
+    h+=S.staff.map(function(s){
+      return '<div class="card"><label for="sn_'+s.id+'" style="margin-top:0">Name</label><input id="sn_'+s.id+'" data-sf="name" data-sid="'+s.id+'" type="text" maxlength="40" value="'+esc(s.name)+'">'+
+        '<div class="row2"><div><label for="sr_'+s.id+'">Role</label><select id="sr_'+s.id+'" data-sf="role" data-sid="'+s.id+'">'+
+          ROLES.concat(ROLES.indexOf(s.role)<0&&s.role?[s.role]:[]).map(function(r){return '<option'+(r===s.role?' selected':'')+'>'+esc(r)+'</option>';}).join('')+'</select></div>'+
+        '<div><label for="sw_'+s.id+'">Daily wage</label><input id="sw_'+s.id+'" data-sf="wage" data-sid="'+s.id+'" type="text" inputmode="decimal" value="'+(s.wage||'')+'" placeholder="0"></div></div>'+
+        '<label for="sp_'+s.id+'">Phone</label><input id="sp_'+s.id+'" data-sf="phone" data-sid="'+s.id+'" type="text" inputmode="tel" maxlength="20" value="'+esc(s.phone||'')+'">'+
+        '<div class="nzh" style="margin-top:12px;align-items:center"><label class="chk"><input type="checkbox" data-sf="active" data-sid="'+s.id+'"'+(s.active!==false?' checked':'')+'>Currently working</label>'+
+        '<button class="x" data-act="delStaff" data-id="'+s.id+'">Remove</button></div></div>';
+    }).join('')+'<p class="mute sm" style="margin:8px 2px 0">Untick Currently working when someone leaves. They disappear from the daily list but their past attendance stays. Remove deletes their attendance too.</p>';
+    return h;
+  }
+
+  /* ================= SETTINGS ================= */
+  function viewSet(){
+    var el=$('v-set');
+    el.innerHTML='<h2>Prices per litre</h2><div class="card">'+
+      S.fuels.map(function(f,i){return '<label for="pr_'+f.id+'" style="'+(i?'':'margin-top:0')+'"><i class="dot" style="--c:var('+f.c+')"></i>'+esc(f.name)+'</label><input id="pr_'+f.id+'" data-price="'+f.id+'" type="text" inputmode="decimal" value="'+f.price+'">';}).join('')+
+      '<p class="mute sm" style="margin:10px 0 0">A new price applies from the next shift you start.</p></div>'+
+      '<h2>MPDs</h2><div class="card">'+
+      S.mpds.map(function(m,i){return '<div class="setrow" style="'+(i?'':'margin-top:0')+'"><input class="full" data-mpname="'+m.id+'" value="'+esc(m.name)+'" maxlength="20" aria-label="MPD name"><span class="mute sm">'+S.nozzles.filter(function(n){return n.mpd===m.id;}).length+' nozzles</span><span></span><button class="btn2" data-act="delMpd" data-id="'+m.id+'">Remove</button></div>';}).join('')+
+      '<div style="margin-top:12px"><button class="btn2" data-act="addMpd">Add MPD</button></div></div>'+
+      '<h2>Nozzles</h2><div class="card"><p class="mute sm" style="margin:0 0 10px">Quick setup for 2 MPDs with 4 nozzles each (nozzles 1 and 2 diesel, nozzles 3 and 4 petrol on each MPD). You can change any nozzle afterwards.</p><button class="btn2" data-act="quickSetup">Set up 2 MPDs, 8 nozzles</button></div>'+
+      S.mpds.map(function(m){
+        var ns=S.nozzles.filter(function(n){return n.mpd===m.id;});
+        return '<div class="card"><div class="nzh"><h3>'+esc(m.name)+'</h3><span class="mute sm">'+ns.length+' nozzles</span></div>'+
+          (ns.length?ns.map(function(n,i){return '<div class="setrow'+(i?' sep':'')+'"><input class="full" data-nzname="'+n.id+'" value="'+esc(n.name)+'" maxlength="20" aria-label="Nozzle name">'+
+            '<select data-nzfuel="'+n.id+'" aria-label="Fuel">'+S.fuels.map(function(f){return '<option value="'+f.id+'"'+(f.id===n.fuel?' selected':'')+'>'+esc(f.name)+'</option>';}).join('')+'</select>'+
+            '<select data-nzmpd="'+n.id+'" aria-label="MPD">'+S.mpds.map(function(x){return '<option value="'+x.id+'"'+(x.id===n.mpd?' selected':'')+'>'+esc(x.name)+'</option>';}).join('')+'</select>'+
+            '<button class="btn2" data-act="delNozzle" data-id="'+n.id+'">Remove</button></div>';}).join(''):'<div class="empty">No nozzles on this MPD yet.</div>')+
+          '<div style="margin-top:12px"><button class="btn2" data-act="addNozzle" data-id="'+m.id+'">Add nozzle to '+esc(m.name)+'</button></div></div>';
+      }).join('')+
+      '<p class="mute sm" style="margin:8px 2px 0">Changes apply from the next shift. A shift already open keeps its own nozzles.</p>'+
+      '<h2>General</h2><div class="card"><label for="pumpName" style="margin-top:0">Pump name (shown on customer statements)</label><input id="pumpName" type="text" maxlength="40" value="'+esc(S.pump)+'"><label for="cur">Currency symbol</label><input id="cur" type="text" maxlength="4" value="'+esc(S.cur)+'"><label for="noteVals">Cash note values for counting (comma separated)</label><input id="noteVals" type="text" value="'+esc((S.notes||[]).join(', '))+'"><label for="testTol">Fuel test limit (ml of error allowed on a 5 L test)</label><input id="testTol" type="text" inputmode="decimal" value="'+S.testTol+'"></div>'+
+      '<h2>Data</h2><div class="card"><p class="mute sm" style="margin:0 0 10px">Everything is saved in this browser only. Clearing site data removes it.</p><button class="btn2 danger" data-act="reset">Delete all data and start fresh</button></div>';
+  }
+
+  /* ================= render + events ================= */
+  function render(){
+    ['shift','credit','oil','exp','staff','rep','set'].forEach(function(t){$('v-'+t).classList.toggle('hide',t!==ui.tab);});
+    [].forEach.call($('tabs').children,function(b){if(b.getAttribute('data-tab')===ui.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+    $('status').innerHTML=S.shift?'<i class="dot" style="--c:var(--ok)"></i>'+esc(S.shift.name)+' shift open':new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+    ({shift:viewShift,credit:viewCredit,oil:viewStock,staff:viewStaff,exp:viewExp,rep:viewRep,set:viewSet})[ui.tab]();
+  }
+  function useToggle(t){
+    var b=$('mpb_'+t.getAttribute('data-use'));if(b)b.classList.toggle('hide',!t.checked);
+    checkStart();
+  }
+
+  document.addEventListener('input',function(e){
+    var t=e.target,sh=S.shift;
+    if(t.id==='cq'){var q=t.value.trim().toLowerCase();[].forEach.call(document.querySelectorAll('.cust-row'),function(r){r.classList.toggle('hide',!!q&&r.getAttribute('data-s').indexOf(q)<0);});return;}
+    if(t.hasAttribute('data-use')){useToggle(t);return;}
+    if(t.hasAttribute('data-open')||t.hasAttribute('data-att')){checkStart();return;}
+    if(t.hasAttribute('data-fdip')){dipLive(t);return;}
+    if(t.hasAttribute('data-at')){var ao={};ao[t.getAttribute('data-at')]=t.value;setAtt(t.getAttribute('data-sid'),ui.attDate||dayKey(Date.now()),ao);return;}
+    if(t.id==='os_q'||t.id==='os_p'){oilTotal();return;}
+    if(!sh){
+      if(t.id==='cs_L')linkSale('L');
+      if(t.id==='cs_A')linkSale('A');
+      return;
+    }
+    if(t.hasAttribute('data-test')||t.hasAttribute('data-terr')){
+      var tid=t.getAttribute('data-test')||t.getAttribute('data-terr'),isT=t.hasAttribute('data-test');
+      sh.nz.forEach(function(n){if(n.id===tid){if(isT)n.test=t.value;else n.terr=t.value;}});
+      armClose=false;save();updateShift();return;
+    }
+    if(t.hasAttribute('data-first')){
+      var fid=t.getAttribute('data-first'),fv=pf(t.value);
+      sh.nz.forEach(function(n){if(n.id===fid&&!isNaN(fv)&&fv>=0){if(n.open0===undefined)n.open0=n.open;n.open=fv;}});
+      armClose=false;save();updateShift();return;
+    }
+    if(t.hasAttribute('data-close')){
+      var id=t.getAttribute('data-close');sh.nz.forEach(function(n){if(n.id===id)n.close=t.value;});
+      armClose=false;save();updateShift();return;
+    }
+    if(t.hasAttribute('data-pay')){mpOf(sh,ui.mp)[t.getAttribute('data-pay')]=t.value;armClose=false;save();updateShift();return;}
+    if(t.hasAttribute('data-den')){
+      var m=mpOf(sh,ui.mp);m.den=m.den||{};m.den[t.getAttribute('data-den')]=t.value;
+      (S.notes||[]).forEach(function(d){var a=$('da_'+d);if(a)a.textContent=money(d*am(m.den[d]));});
+      var tot=denTotal(m);$('denTot').textContent=money(tot);
+      m.cash=tot>0?String(tot):'';$('pc').value=m.cash;
+      armClose=false;save();updateShift();return;
+    }
+    if(t.hasAttribute('data-cnote')){mpOf(sh,ui.mp).cashNote=t.value;save();return;}
+    if(t.hasAttribute('data-mend')){mpOf(sh,ui.mp).endT=t.value;save();return;}
+    if(t.hasAttribute('data-time')){
+      if(t.getAttribute('data-time')==='t0'){var v=new Date(t.value).getTime();if(!isNaN(v)){sh.t0=v;sh.date=dayKey(v);var ds=$('dStart');if(ds)ds.textContent='Started '+dtm(v);}}
+      else{sh.endT=t.value;}
+      save();return;
+    }
+    if(t.id==='cs_L')linkSale('L');
+    if(t.id==='cs_A')linkSale('A');
+  });
+  document.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.hasAttribute('data-use')){useToggle(t);return;}
+    if(t.hasAttribute('data-fs')){
+      var fz=S.fstock[t.getAttribute('data-fs')],fk=t.getAttribute('data-f'),nvv=pf(t.value);
+      if(!fz)return;
+      if(isNaN(nvv)||nvv<0){t.value=fz[fk]||'';toast('Enter a number');return;}
+      fz[fk]=r2(nvv);t.value=fz[fk]||'';save();toast('Saved');return;
+    }
+    if(t.id==='at_date'){ui.attDate=t.value||dayKey(Date.now());render();return;}
+    if(t.id==='am_exc'){S.exCredit=t.checked;save();render();return;}
+    if(t.id==='am_month'){ui.attMonth=t.value||dayKey(Date.now()).slice(0,7);render();return;}
+    if(t.hasAttribute('data-sf')){
+      var sf=staffBy(t.getAttribute('data-sid')),sk=t.getAttribute('data-sf');
+      if(!sf)return;
+      if(sk==='active')sf.active=t.checked;
+      else if(sk==='wage'){var wv=pf(t.value);sf.wage=(isNaN(wv)||wv<0)?0:r2(wv);t.value=sf.wage||'';}
+      else if(sk==='name'){var snm=t.value.trim();if(!snm){t.value=sf.name;toast('Enter a name');return;}sf.name=snm;}
+      else sf[sk]=t.value.trim();
+      save();toast('Saved');return;
+    }
+    if(t.id==='dr_date'){ui.repDate=t.value||dayKey(Date.now());render();return;}
+    if(t.id==='os_item'){oilPick();return;}
+    if(t.hasAttribute('data-oil')){
+      var oo=oilBy(t.getAttribute('data-oil')),fld=t.getAttribute('data-f');if(!oo)return;
+      if(fld==='name'||fld==='pack'){
+        var sv=t.value.trim();
+        if(fld==='name'&&!sv){t.value=oo.name;toast('Enter a name');return;}
+        oo[fld]=sv;
+      }else{
+        var nv=pf(t.value);
+        if(isNaN(nv)||nv<0){t.value=oo[fld];toast('Enter a number');return;}
+        oo[fld]=r2(nv);t.value=oo[fld];
+      }
+      save();toast('Saved');return;
+    }
+    if(t.id==='cs_fuel'){linkSale('L');return;}
+    if(t.hasAttribute('data-price')){
+      var f=fuelBy(t.getAttribute('data-price')),v=pf(t.value);
+      if(isNaN(v)||v<=0){t.value=f.price;toast('Enter a price above zero');return;}
+      f.price=r2(v);t.value=f.price;save();toast(f.name+' price updated');return;
+    }
+    if(t.hasAttribute('data-mpname')){S.mpds.forEach(function(m){if(m.id===t.getAttribute('data-mpname'))m.name=t.value.trim()||m.name;});save();toast('MPD updated');return;}
+    if(t.hasAttribute('data-nzname')){S.nozzles.forEach(function(n){if(n.id===t.getAttribute('data-nzname'))n.name=t.value.trim()||n.name;});save();toast('Nozzle updated');return;}
+    if(t.hasAttribute('data-nzfuel')){S.nozzles.forEach(function(n){if(n.id===t.getAttribute('data-nzfuel'))n.fuel=t.value;});save();toast('Nozzle updated');return;}
+    if(t.hasAttribute('data-nzmpd')){S.nozzles.forEach(function(n){if(n.id===t.getAttribute('data-nzmpd'))n.mpd=t.value;});save();viewSet();toast('Nozzle moved');return;}
+    if(t.id==='testTol'){var tv=pf(t.value);if(isNaN(tv)||tv<0){t.value=S.testTol;toast('Enter a number');return;}S.testTol=r2(tv);save();toast('Saved');return;}
+    if(t.id==='noteVals'){
+      var vs=t.value.split(/[ ,]+/).map(Number).filter(function(x){return x>0&&isFinite(x);});
+      vs=vs.filter(function(x,i){return vs.indexOf(x)===i;}).sort(function(a,b){return b-a;});
+      if(!vs.length){t.value=S.notes.join(', ');toast('Enter at least one note value');return;}
+      S.notes=vs;t.value=vs.join(', ');save();toast('Note values saved');return;
+    }
+    if(t.id==='pumpName'){S.pump=t.value.trim();save();toast('Pump name saved');return;}
+    if(t.id==='cur'){S.cur=t.value.trim()||'\u20B9';save();toast('Currency updated');return;}
+  });
+  document.addEventListener('click',function(e){
+    var tb=e.target.closest('[data-tab]');
+    if(tb){ui.tab=tb.getAttribute('data-tab');if(ui.tab!=='credit')ui.cust=null;render();window.scrollTo(0,0);return;}
+    var b=e.target.closest('[data-act]');if(!b)return;
+    var a=b.getAttribute('data-act'),id=b.getAttribute('data-id');
+    switch(a){
+      case 'startShift':startShift();break;
+      case 'closeShift':closeShift();break;
+      case 'discardShift':discardShift(b);break;
+      case 'mEndNow':{var mo=mpOf(S.shift,ui.mp);mo.endT=toLocalInput(Date.now());save();render();toast('Closing time set to now');break;}
+      case 'mEndClear':{mpOf(S.shift,ui.mp).endT='';save();render();break;}
+      case 'endNow':S.shift.endT=toLocalInput(Date.now());save();render();toast('Closing time set to now');break;
+      case 'endClear':S.shift.endT='';save();render();break;
+      case 'testAdd':{
+        var tn=S.shift?S.shift.nz.filter(function(n){return n.id===id;})[0]:null;if(!tn)return;
+        tn.test=String(r2(am(tn.test)+5));var ti=$('t_'+id);if(ti)ti.value=tn.test;
+        armClose=false;save();updateShift();break;
+      }
+      case 'editStart':{ui.mp='sum';render();var ts=$('tStart');if(ts){if(ts.scrollIntoView)ts.scrollIntoView({block:'center'});if(ts.focus)ts.focus();}break;}
+      case 'editTimes':ui.editShift=(ui.editShift===id?null:id);render();break;
+      case 'saveTimes':{
+        var es=S.shifts.filter(function(x){return x.id===id;})[0];if(!es)return;
+        var ns=new Date($('est_'+id).value).getTime(),ne=new Date($('eet_'+id).value).getTime();
+        if(isNaN(ns)||isNaN(ne)){toast('Enter both the start and the closing time');return;}
+        if(ne<ns){toast('The closing time is before the start time');return;}
+        var emps=es.res.mps||[],etimes=[];
+        for(var qi=0;qi<emps.length;qi++){
+          var einp=$('emt_'+id+'_'+emps[qi].id),tv=einp?new Date(einp.value).getTime():ne;
+          if(isNaN(tv))tv=ne;
+          if(tv<ns){toast(emps[qi].name+' closing time is before the start time');return;}
+          etimes.push(tv);
+        }
+        var enames=[],ename;
+        if(emps.length){
+          for(var qj=0;qj<emps.length;qj++){
+            var nin=$('ean_'+id+'_'+emps[qj].id);ename=nin?nin.value.trim():emps[qj].att;
+            if(!ename){toast('Enter the attendant name for '+emps[qj].name);return;}
+            enames.push(ename);
+          }
+        }else{
+          var nin2=$('ean_'+id+'_all');ename=nin2?nin2.value.trim():(es.att||'');
+          if(!ename){toast('Enter the attendant name');return;}
+          enames.push(ename);
+        }
+        es.t0=ns;es.t1=ne;es.date=dayKey(ns);
+        emps.forEach(function(m,i){m.t1=etimes[i];});
+        if(emps.length){
+          emps.forEach(function(m,i){
+            var oldN=m.att,newN=enames[i];m.att=newN;
+            if(oldN!==newN){
+              var fix=function(e){
+                if(e.shift!==es.id)return;
+                var mine=(e.mpd&&emps.some(function(x){return x.id===e.mpd;}))?e.mpd===m.id:i===0;
+                if(mine)e.att=newN;
+              };
+              S.ledger.forEach(fix);S.expenses.forEach(fix);S.oilSales.forEach(fix);
+            }
+          });
+          es.att=emps.map(function(m){return m.att;}).filter(Boolean).join(', ');
+        }else{es.att=enames[0];}
+        S.fuelLog.forEach(function(e){if(e.ref===es.id&&e.type==='sale')e.t=ne;});
+        ui.editShift=null;save();render();toast('Changes saved');break;
+      }
+      case 'mpTab':ui.mp=id;armClose=false;render();window.scrollTo(0,0);break;
+      case 'xClose':closeExportSheet();break;
+      case 'xCopy':{
+        var xta=$('xtext');
+        var xdone=function(){toast('Copied. Paste it into Excel or Google Sheets');};
+        var xfail=function(){
+          if(xta){if(xta.focus)xta.focus();if(xta.select)xta.select();try{if(document.execCommand&&document.execCommand('copy')){xdone();return;}}catch(e){}}
+          toast('Press and hold the text, choose Select all, then Copy');
+        };
+        try{navigator.clipboard.writeText(xfile.tsv).then(xdone,xfail);}catch(e){xfail();}
+        break;
+      }
+      case 'xShare':{
+        try{
+          var xf=new File([xfile.bytes],xfile.name,{type:XLS_MIME});
+          navigator.share({files:[xf],title:xfile.name}).catch(function(err){if(err&&err.name==='AbortError')return;toast('Sharing did not work here. Try Copy for Excel');});
+        }catch(e){toast('Sharing did not work here. Try Copy for Excel');}
+        break;
+      }
+      case 'xDownload':{
+        try{
+          var xb=new Blob([xfile.bytes],{type:XLS_MIME}),xu=URL.createObjectURL(xb),xa=document.createElement('a');
+          xa.href=xu;xa.download=xfile.name;document.body.appendChild(xa);xa.click();
+          setTimeout(function(){if(xa.parentNode)xa.parentNode.removeChild(xa);URL.revokeObjectURL(xu);},1500);
+          toast('If nothing was saved, use Share or Copy for Excel');
+        }catch(e){toast('Download did not work here. Try Copy for Excel');}
+        break;
+      }
+      case 'stView':ui.stView=b.getAttribute('data-v');render();break;
+      case 'attSet':{
+        var adt=ui.attDate||dayKey(Date.now()),acur=attBy(id,adt),anv=b.getAttribute('data-v');
+        setAtt(id,adt,{st:(acur&&acur.st===anv)?'':anv});render();break;
+      }
+      case 'attAllPresent':{
+        var adt2=ui.attDate||dayKey(Date.now());
+        activeStaff().forEach(function(st2){var a2=attBy(st2.id,adt2);if(!a2||!a2.st)setAtt(st2.id,adt2,{st:'P'});});
+        render();toast('Everyone not yet marked is now present');break;
+      }
+      case 'addStaffToggle':ui.addStaff=!ui.addStaff;render();break;
+      case 'saveStaff':{
+        var sname=$('sf_name').value.trim();if(!sname){toast('Enter the name');return;}
+        S.staff.push({id:'st'+uid(),name:sname,role:$('sf_role').value,phone:$('sf_phone').value.trim(),wage:r2(am($('sf_wage').value)),active:true});
+        ui.addStaff=false;save();render();toast(sname+' added');break;
+      }
+      case 'delStaff':twoTap(b,'Tap again to remove',function(){
+        S.staff=S.staff.filter(function(x){return x.id!==id;});
+        S.attend=S.attend.filter(function(x){return x.sid!==id;});
+        S.deds=S.deds.filter(function(x){return x.sid!==id;});
+        save();render();toast('Staff removed');
+      });break;
+      case 'addDed':{
+        var dty=$('dd_t_'+id).value,dam=pf($('dd_a_'+id).value),ddt=$('dd_d_'+id).value;
+        if(isNaN(dam)||dam<=0){toast('Enter the amount');return;}
+        if(!ddt){toast('Pick a date');return;}
+        S.deds.push({id:uid(),sid:id,date:ddt,type:dty,A:r2(dam),note:$('dd_n_'+id).value.trim()});
+        ui.openStaff=id;if(ddt.slice(0,7)!==(ui.attMonth||dayKey(Date.now()).slice(0,7)))ui.attMonth=ddt.slice(0,7);
+        save();render();toast((dty==='adv'?'Advance':'Expense')+' added \u00B7 '+money(r2(dam)));break;
+      }
+      case 'delDed':twoTap(b,'Tap again to delete',function(){
+        S.deds=S.deds.filter(function(x){return x.id!==id;});ui.openStaff=b.getAttribute('data-sid');
+        save();render();toast('Deleted');
+      });break;
+      case 'exportAtt':exportAtt(id);break;
+      case 'shareAtt':shareText(attSummaryText(monthData(id)),'Staff attendance '+id,'Summary copied');break;
+      case 'copyAtt':copyText(attSummaryText(monthData(id)),'Summary copied');break;
+      case 'repView':ui.repView=b.getAttribute('data-v');render();break;
+      case 'openDay':ui.tab='rep';ui.repView='day';ui.repDate=id;render();window.scrollTo(0,0);break;
+      case 'exportDay':exportDay(id);break;
+      case 'shareDay':shareText(daySummaryText(dayData(id)),'Day sales report '+id,'Summary copied');break;
+      case 'copyDay':copyText(daySummaryText(dayData(id)),'Summary copied');break;
+      case 'exportShift':exportShift(id);break;
+      case 'dismissClosed':ui.lastClosed=null;render();break;
+      case 'cview':ui.cview=b.getAttribute('data-v');render();break;
+      case 'addCustToggle':ui.addCust=!ui.addCust;render();break;
+      case 'editCustToggle':ui.editCust=!ui.editCust;render();break;
+      case 'saveCust':{
+        var cn=$('cf_name').value.trim();if(!cn){toast('Enter the customer name');return;}
+        var vals={name:cn,phone:$('cf_phone').value.trim(),addr:$('cf_addr').value.trim(),veh:$('cf_veh').value.trim().toUpperCase(),limit:am($('cf_limit').value),due:Math.round(am($('cf_due').value))};
+        if(id){
+          var nobE=r2(am($('cf_open').value)),odE=oldDues(id),dRawE=$('cf_odate').value,dT=dRawE?new Date(dRawE+'T00:00:00').getTime():NaN;
+          if(isNaN(dT))dT=odE.t||Date.now();
+          var sameDate=odE.t!=null&&dayKey(dT)===dayKey(odE.t);
+          if(nobE!==odE.A||(nobE>0&&!sameDate)){
+            if(r2(balOf(id)-odE.A+nobE)<0){toast('Payments already received are more than that. Raise the old dues or check the payments.');return;}
+            var prevE=S.ledger.filter(function(e){return e.cust===id&&e.type==='open';})[0];
+            S.ledger=S.ledger.filter(function(e){return !(e.cust===id&&e.type==='open');});
+            if(nobE>0){
+              var oe={id:uid(),cust:id,t:dT,type:'open',A:nobE,shift:null};
+              if(nobE!==odE.A){if(odE.A>0)oe.was=odE.A;}else if(prevE&&prevE.was!=null){oe.was=prevE.was;}
+              S.ledger.push(oe);
+            }
+          }
+          Object.assign(custBy(id),vals);ui.editCust=false;toast('Account updated');
+        }
+        else{
+          var nc={id:uid(),acc:nextAcc(S.customers),t:Date.now()};Object.assign(nc,vals);S.customers.push(nc);
+          var ob=am($('cf_open').value),odRaw=$('cf_odate').value,odT=odRaw?new Date(odRaw+'T00:00:00').getTime():Date.now();if(isNaN(odT))odT=Date.now();
+          if(ob>0)S.ledger.push({id:uid(),cust:nc.id,t:odT,type:'open',A:r2(ob),shift:null});
+          ui.addCust=false;toast('Account '+nc.acc+' created');
+        }
+        save();render();break;
+      }
+      case 'editOldDues':{ui.editCust=true;render();var od1=$('cf_open');if(od1){if(od1.scrollIntoView)od1.scrollIntoView({block:'center'});if(od1.focus)od1.focus();}break;}
+      case 'openCust':ui.cust=id;ui.editCust=false;render();window.scrollTo(0,0);break;
+      case 'backCust':ui.cust=null;ui.editCust=false;render();break;
+      case 'per':ui.per=b.getAttribute('data-v');render();break;
+      case 'shareStmt':{var sc=custBy(id);shareText(stmtText(sc,ui.per||'month'),'Account statement '+sc.acc);break;}
+      case 'copyStmt':copyText(stmtText(custBy(id),ui.per||'month'));break;
+      case 'addSale':{
+        var sh=S.shift;if(!sh){toast('Start a shift first');return;}
+        var f=$('cs_fuel').value,p=sh.prices[f]||fuelBy(f).price||0,L=am($('cs_L').value),A=am($('cs_A').value);
+        if(!A&&L)A=r2(L*p);
+        if(!L&&A&&p)L=r2(A/p);
+        if(!(A>0)||!(L>0)){toast('Enter litres or an amount');return;}
+        var c=custBy(id),bal=balOf(id);
+        if(c.limit>0&&bal+A>c.limit){toast('Over the credit limit of '+money(c.limit)+' ('+money(Math.max(0,c.limit-bal))+' left)');return;}
+        var mm=pickMp('cs_mp');
+        S.ledger.push({id:uid(),cust:id,t:Date.now(),type:'sale',fuel:f,L:r2(L),A:r2(A),veh:$('cs_veh').value.trim().toUpperCase(),shift:sh.id,sn:sh.name,mpd:mm.id,mn:mm.name,att:mm.att});
+        save();toast('Credit sale added \u00B7 '+money(A));render();break;
+      }
+      case 'addPay':{
+        var pa=am($('cp_A').value);if(!(pa>0)){toast('Enter the amount received');return;}
+        if(pa>balOf(id)){toast('That is more than the '+money(balOf(id))+' due');return;}
+        var ps=S.shift,pm=ps?pickMp('cp_mp'):null;
+        S.ledger.push({id:uid(),cust:id,t:Date.now(),type:'pay',A:r2(pa),mode:$('cp_mode').value,note:$('cp_note').value.trim(),shift:ps?ps.id:null,sn:ps?ps.name:'',mpd:pm?pm.id:null,mn:pm?pm.name:'',att:pm?pm.att:''});
+        save();toast('Payment recorded \u00B7 '+money(pa));render();break;
+      }
+      case 'delLedger':twoTap(b,'Tap again to delete',function(){S.ledger=S.ledger.filter(function(x){return x.id!==id;});save();toast('Entry deleted');render();});break;
+      case 'addExp':{
+        var ea=am($('ex_A').value);if(!(ea>0)){toast('Enter the amount');return;}
+        var es=S.shift,em=es?pickMp('ex_mp'):null;
+        S.expenses.push({id:uid(),t:Date.now(),cat:$('ex_cat').value,A:r2(ea),note:$('ex_note').value.trim(),shift:es?es.id:null,mpd:em?em.id:null,mn:em?em.name:'',att:em?em.att:''});
+        save();toast('Expense added \u00B7 '+money(ea));render();break;
+      }
+      case 'delExp':twoTap(b,'Tap again to delete',function(){S.expenses=S.expenses.filter(function(x){return x.id!==id;});save();toast('Expense deleted');render();});break;
+      case 'dipMode':ui.dipMode=ui.dipMode||{};ui.dipMode[id]=b.getAttribute('data-v');render();break;
+      case 'chartSave':{
+        var cf=S.fstock[id];if(!cf)return;
+        var pc=parseChart($('fch_'+id).value);
+        if(pc.error){toast(pc.error);return;}
+        cf.chart=pc.pts;cf.unit=$('fu_'+id).value.trim()||'cm';
+        if(!(cf.cap>0))cf.cap=pc.pts[pc.pts.length-1][1];
+        save();render();toast('Dip chart saved \u00B7 '+pc.pts.length+' readings');break;
+      }
+      case 'chartClear':twoTap(b,'Tap again to clear',function(){var cc=S.fstock[id];if(cc){delete cc.chart;}save();render();toast('Dip chart cleared');});break;
+      case 'stockView':ui.stockView=b.getAttribute('data-v');render();break;
+      case 'fuelAdd':{
+        var fa1=S.fstock[id];if(!fa1)return;
+        if(fa1.stock==null){toast('Set the starting stock with a dip reading first');return;}
+        var fq=am(document.querySelector('[data-fd="'+id+'"]').value);
+        if(!(fq>0)){toast('Enter the litres received');return;}
+        var ft=new Date(document.querySelector('[data-ft="'+id+'"]').value).getTime();if(isNaN(ft))ft=Date.now();
+        fa1.stock=r2(fa1.stock+fq);
+        S.fuelLog.push({id:uid(),t:ft,fuel:id,type:'delivery',qty:r2(fq),after:fa1.stock,note:document.querySelector('[data-fn="'+id+'"]').value.trim()});
+        save();render();
+        toast(fa1.cap>0&&fa1.stock>fa1.cap?'Delivery added, but it is above the tank capacity. Check the dip.':'Delivery added \u00B7 '+fmt(fq)+' L');break;
+      }
+      case 'fuelDip':{
+        var fd1=S.fstock[id];if(!fd1)return;
+        var dRaw=pf(document.querySelector('[data-fdip="'+id+'"]').value),dv=dRaw,dnote=null,dci=chartInfo(fd1);
+        if(dci&&dipMode(id)==='h'){
+          if(isNaN(dRaw)||dRaw<0){toast('Enter the dip height in '+(fd1.unit||'cm'));return;}
+          dv=chartLitres(fd1.chart,dRaw);
+          if(dv==null){toast('That reading is outside the chart ('+dci.lo+' to '+dci.hi+' '+(fd1.unit||'cm')+')');return;}
+          dnote=dRaw+' '+(fd1.unit||'cm')+' on the chart';
+        }
+        if(isNaN(dv)||dv<0){toast('Enter the dip reading in litres');return;}
+        var sold=fuelSold(),before=fuelNow(id,sold),firstSet=fd1.stock==null;
+        fd1.stock=r2(dv);
+        if(S.shift){S.shift.fa=S.shift.fa||{};S.shift.fa[id]=sold[id]||0;}
+        var vr=firstSet?0:r2(dv-before);
+        S.fuelLog.push({id:uid(),t:Date.now(),fuel:id,type:'dip',qty:vr,before:before,after:fd1.stock,note:(firstSet?'Starting stock':'Dip reading')+(dnote?' \u00B7 '+dnote:'')});
+        save();render();
+        toast(firstSet?'Starting stock set':(vr===0?'Dip matches the book stock':'Dip is '+fmt(Math.abs(vr))+' L '+(vr>0?'more':'less')+' than the book stock'));break;
+      }
+      case 'delFuelLog':twoTap(b,'Tap again to delete',function(){
+        var le=S.fuelLog.filter(function(x){return x.id===id;})[0];if(!le||le.type!=='delivery')return;
+        var fl=S.fstock[le.fuel];if(fl&&fl.stock!=null)fl.stock=r2(fl.stock-le.qty);
+        S.fuelLog=S.fuelLog.filter(function(x){return x.id!==id;});save();render();toast('Delivery deleted');
+      });break;
+      case 'oilView':ui.oilView=b.getAttribute('data-v');render();break;
+      case 'oilPay':{
+        ui.oilPay=b.getAttribute('data-v');
+        [].forEach.call($('os_pay').children,function(x){x.setAttribute('aria-pressed',x===b);});
+        var oc=$('os_credit');if(oc)oc.classList.toggle('hide',ui.oilPay!=='Credit');
+        break;
+      }
+      case 'addOilToggle':ui.oilDraft=null;ui.addOil=!ui.addOil;render();break;
+      case 'oilVariant':{var vo=oilBy(id);if(!vo)return;ui.oilDraft={name:vo.name,pack:''};ui.addOil=true;render();window.scrollTo(0,0);break;}
+      case 'oilChip':{var nn=$('np_name');if(nn)nn.value=b.getAttribute('data-v');break;}
+      case 'saveOil':{
+        var onm=$('np_name').value.trim();if(!onm){toast('Enter the product name');return;}
+        var opk=$('np_pack').value.trim();
+        if(S.oils.some(function(o){return o.name.toLowerCase()===onm.toLowerCase()&&(o.pack||'').toLowerCase()===opk.toLowerCase();})){toast('That product and pack size already exists');return;}
+        S.oils.push({id:'o'+uid(),name:onm,pack:$('np_pack').value.trim(),price:r2(am($('np_price').value)),stock:r2(am($('np_stock').value)),min:r2(am($('np_min').value))});
+        ui.addOil=false;ui.oilDraft=null;save();render();toast('Product added');break;
+      }
+      case 'oilAdd':{
+        var po=oilBy(id),qa=am(document.querySelector('[data-oiladd="'+id+'"]').value);
+        if(!po)return;if(!(qa>0)){toast('Enter the units received');return;}
+        po.stock=r2(po.stock+qa);save();render();toast('Added '+fmtQ(qa)+' to '+po.name);break;
+      }
+      case 'oilSet':{
+        var ps=oilBy(id),qs=pf(document.querySelector('[data-oilset="'+id+'"]').value);
+        if(!ps)return;if(isNaN(qs)||qs<0){toast('Enter the counted stock');return;}
+        ps.stock=r2(qs);save();render();toast(ps.name+' stock set to '+fmtQ(qs));break;
+      }
+      case 'delOilProd':twoTap(b,'Tap again to remove',function(){S.oils=S.oils.filter(function(o){return o.id!==id;});save();render();toast('Product removed');});break;
+      case 'addOil':{
+        var osh=S.shift;if(!osh){toast('Start a shift first');return;}
+        var pr=oilBy($('os_item').value);if(!pr){toast('Choose a product');return;}
+        var q=am($('os_q').value),price=am($('os_p').value);
+        if(!(q>0)||!(price>0)){toast('Enter the quantity and the price');return;}
+        if(q>pr.stock){toast('Only '+fmtQ(pr.stock)+' in stock');return;}
+        var opay=ui.oilPay||'Cash',oc2=null,OA=r2(q*price);
+        if(opay==='Credit'){
+          oc2=$('os_cust')?custBy($('os_cust').value):null;
+          if(!oc2){toast('Choose a credit customer');return;}
+          var ob2=balOf(oc2.id);
+          if(oc2.limit>0&&ob2+OA>oc2.limit){toast('Over the credit limit of '+money(oc2.limit)+' ('+money(Math.max(0,oc2.limit-ob2))+' left)');return;}
+        }
+        var om=pickMp('os_mp'),oid=uid(),lid=null,now=Date.now();
+        pr.stock=r2(pr.stock-q);
+        if(oc2){
+          lid=uid();
+          S.ledger.push({id:lid,cust:oc2.id,t:now,type:'sale',item:oilLabel(pr),q:q,L:0,A:OA,veh:'',shift:osh.id,sn:osh.name,mpd:om.id,mn:om.name,att:om.att,oilId:oid});
+        }
+        S.oilSales.push({id:oid,t:now,item:pr.id,name:pr.name,pack:pr.pack||'',q:q,price:price,A:OA,pay:opay,cust:oc2?oc2.id:null,lid:lid,shift:osh.id,sn:osh.name,mpd:om.id,mn:om.name,att:om.att});
+        save();render();toast('Oil sale recorded \u00B7 '+money(OA));break;
+      }
+      case 'delOil':twoTap(b,'Tap again to delete',function(){
+        var es=S.oilSales.filter(function(x){return x.id===id;})[0];if(!es)return;
+        var ep=oilBy(es.item);if(ep)ep.stock=r2(ep.stock+es.q);
+        if(es.lid)S.ledger=S.ledger.filter(function(x){return x.id!==es.lid;});
+        S.oilSales=S.oilSales.filter(function(x){return x.id!==id;});
+        save();render();toast('Oil sale deleted and stock restored');
+      });break;
+      case 'addMpd':S.mpds.push({id:'m'+uid(),name:'MPD '+(S.mpds.length+1)});save();render();break;
+      case 'delMpd':
+        if(S.mpds.length<2){toast('Keep at least one MPD');return;}
+        if(S.nozzles.some(function(n){return n.mpd===id;})){toast('Move or remove its nozzles first');return;}
+        S.mpds=S.mpds.filter(function(m){return m.id!==id;});save();render();break;
+      case 'addNozzle':S.nozzles.push({id:'n'+uid(),name:'Nozzle '+(S.nozzles.length+1),fuel:S.fuels[0].id,mpd:S.mpds.some(function(m){return m.id===id;})?id:S.mpds[0].id});save();render();break;
+      case 'quickSetup':
+        if(S.shift){toast('Close or discard the open shift first');return;}
+        twoTap(b,'Tap again to replace the nozzles',function(){
+          var a1=S.mpds[0]?S.mpds[0].name:'MPD 1',a2=S.mpds[1]?S.mpds[1].name:'MPD 2';
+          S.mpds=[{id:'m1',name:a1},{id:'m2',name:a2}];S.nozzles=defNozzles();
+          save();render();toast('Set up 2 MPDs with 4 nozzles each');
+        });break;
+      case 'delNozzle':S.nozzles=S.nozzles.filter(function(n){return n.id!==id;});save();render();break;
+      case 'reset':twoTap(b,'Tap again to delete everything',function(){S=fresh();save();ui={tab:'shift',mp:null,cview:'customers',cust:null,addCust:false,editCust:false,per:'month',lastClosed:null,oilView:'sell',oilPay:'Cash',addOil:false,stockView:'fuel'};toast('All data deleted');render();});break;
+    }
+  });
+
+  render();
+})();
+</script>
+<script>document.getElementById('logout').addEventListener('click',function(){try{localStorage.removeItem('pumpdesk.session');sessionStorage.removeItem('pumpdesk.session');}catch(e){}location.replace('login.html');});</script>
+</body>
+</html>
